@@ -383,6 +383,7 @@ class DevicesWidget(log.Loggable):
                                         device))
         for service in device.services:
             _,_,_,service_class,version = service.service_type.split(':')
+            service.subscribe()
             service_item = self.store.append(item,(SERVICE,':'.join((service_class,version)),service.service_type,self.service_icon,service))
             variables_item = self.store.append(service_item,(-1,'State Variables','',self.folder_icon,None))
             for variable in service.get_state_variables(0).values():

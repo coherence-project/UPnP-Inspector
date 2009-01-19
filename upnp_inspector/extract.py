@@ -150,11 +150,11 @@ class Extract(object):
                 print "files have been saved to /tmp/%s" % uuid
                 if make_tar == True:
                     tgz_file = self.create_tgz(path.child(uuid))
-                    if self.email_button.get_active() == True:
+                    if haz_smtp == True and self.email_button.get_active() == True:
                         self.send_email(tgz_file)
                     path.child(uuid).remove()
                 self.progressbar.set_fraction(0.0)
-                self.dialog.destroy()
+                self.window.hide()
 
             device_extract(self.device,path)
 

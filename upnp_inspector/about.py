@@ -40,4 +40,5 @@ David Göthberg: Public Domain""")
         self.window.connect('response',self.response)
 
     def response(self,widget,response):
-        self.window.destroy()
+        widget.destroy()
+        return True

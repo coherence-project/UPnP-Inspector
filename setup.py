@@ -14,32 +14,37 @@ setup(
 based on the Coherence DLNA/UPnP framework.
 
 Loosely modeled after the Intel UPnP Device Spy and the UPnP Test Tool.
+
+This is the initial release.
+
+Features:
+
+ * inspect UPnP devices, services, actions and state-variables
+ * invoke actions on any service
+ * extract UPnP device- and service-description xml-files
+ * follow and analyze events
+ * interact with well-known devices, e.g. browse the ContentDirectory of an UPnP A/V MediaServer and inspect its containers and items
 """,
     author="Frank Scholz",
     author_email='coherence@beebits.net',
     license = "MIT",
     packages=packages,
     scripts = ['bin/upnp-inspector'],
-    url = "http://coherence.beebits.net",
+    url = "http://coherence.beebits.net/wiki/UPnP-Inspector",
     download_url = 'http://coherence.beebits.net/download/UPnP-Inspector-%s.tar.gz' % __version__,
     keywords=['UPnP', 'DLNA'],
     classifiers = ['Development Status :: 4 - Beta',
                    'Environment :: X11 Applications :: Gnome',
                    'Environment :: X11 Applications :: GTK',
-                   'Environment :: Win 32 (MS Windows)',
-                   'Environment :: MacOS X',
                    'License :: OSI Approved :: MIT License',
                    'Operating System :: OS Independent',
                    'Programming Language :: Python',
                 ],
 
-    entry_points="""
-    """,
-
     package_data = {
         'upnp_inspector': ['icons/*.png'],
     },
     install_requires=[
-    'Coherence >= 0.5.9'
-    ],
+    'Coherence >= 0.6.0',
+    ]
 )

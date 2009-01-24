@@ -25,6 +25,7 @@ from coherence import log
 from about import AboutWidget
 from details import DetailsWidget
 from events import EventsWidget
+from log import LogWidget
 from devices import DevicesWidget,OBJECT_COLUMN
 
 class Inspector(log.Loggable):
@@ -62,8 +63,8 @@ class Inspector(log.Loggable):
         self.show_events_item.connect("activate", self.show_events_widget, "view.events")
         self.show_log_item = gtk.CheckMenuItem("show global log")
         menu.append(self.show_log_item)
-        #self.show_log_item.connect("activate", self.show_log_widget, "view.log")
-        self.show_log_item.set_sensitive(False)
+        self.show_log_item.connect("activate", self.show_log_widget, "view.log")
+        #self.show_log_item.set_sensitive(False)
         view_menu = gtk.MenuItem("View")
         view_menu.set_submenu(menu)
         menu_bar.append(view_menu)
@@ -93,6 +94,9 @@ class Inspector(log.Loggable):
         self.events_widget.window.connect('delete_event',self.hide_events_widget)
         self.details_widget = DetailsWidget(self.coherence)
         self.details_widget.window.connect('delete_event',self.hide_details_widget)
+        self.log_widget = LogWidget(self.coherence)
+        self.log_widget.window.connect('delete_event',self.hide_log_widget)
+
 
     def show_details(self,widget,event):
         #print "show_details", widget
@@ -127,6 +131,17 @@ class Inspector(log.Loggable):
     def hide_events_widget(self,w,e):
         self.events_widget.window.hide()
         self.show_events_item.set_active(False)
+        return True
+
+    def show_log_widget(self,w,hint):
+        if w.get_active() == True:
+            self.log_widget.window.show_all()
+        else:
+            self.log_widget.window.hide()
+
+    def hide_log_widget(self,w,e):
+        self.log_widget.window.hide()
+        self.show_log_item.set_active(False)
         return True
 
     def show_about_widget(self,w,hint):

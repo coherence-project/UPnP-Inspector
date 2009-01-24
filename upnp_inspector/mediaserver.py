@@ -482,6 +482,7 @@ class MediaServerWidget(log.Loggable):
         self.coherence = coherence
         self.device = device
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+        self.window.connect("delete_event", self.hide)
         self.window.set_default_size(400,600)
         self.window.set_title('Browse MediaServer %s' % device.get_friendly_name())
         self.item_details = ItemDetailsWidget()
@@ -491,3 +492,7 @@ class MediaServerWidget(log.Loggable):
         vpane.add2(self.item_details.window)
         self.window.add(vpane)
         self.window.show_all()
+
+    def hide(self,w,e):
+        w.hide()
+        return True

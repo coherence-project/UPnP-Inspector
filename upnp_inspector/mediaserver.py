@@ -283,9 +283,11 @@ class TreeWidget(object):
         except:
             return False
 
-    def state_variable_change( self, udn, service, variable, value):
-        #print "state_variable_change", udn, service, variable, 'changed to', value
-        if variable == 'ContainerUpdateIDs':
+    def state_variable_change( self, variable):
+        #print variable.name, 'changed to', variable.value
+        name = variable.name
+        value = variable.value
+        if name == 'ContainerUpdateIDs':
             changes = value.split(',')
             while len(changes) > 1:
                 container = changes.pop(0).strip()
@@ -308,22 +310,21 @@ class TreeWidget(object):
 
                 row_count = 0
                 for row in self.store:
-                    if udn == row[UDN_COLUMN]:
-                        iter = self.store.get_iter(row_count)
-                        match_iter = search(self.store, self.store.iter_children(iter),
-                                        match_func, (ID_COLUMN, container))
-                        if match_iter:
-                            print "heureka, we have a change in ", container, ", container needs a reload"
-                            path = self.store.get_path(match_iter)
-                            expanded = self.treeview.row_expanded(path)
+                    iter = self.store.get_iter(row_count)
+                    match_iter = search(self.store, self.store.iter_children(iter),
+                                    match_func, (ID_COLUMN, container))
+                    if match_iter:
+                        print "heureka, we have a change in ", container, ", container needs a reload"
+                        path = self.store.get_path(match_iter)
+                        expanded = self.treeview.row_expanded(path)
+                        child = self.store.iter_children(match_iter)
+                        while child:
+                            self.store.remove(child)
                             child = self.store.iter_children(match_iter)
-                            while child:
-                                self.store.remove(child)
-                                child = self.store.iter_children(match_iter)
-                            self.browse(self.treeview,path,None,
-                                        starting_index=0,requested_count=0,force=True,expand=expanded)
+                        self.browse(self.treeview,path,None,
+                                    starting_index=0,requested_count=0,force=True,expand=expanded)
 
-                        break
+                    break
                     row_count += 1
 
     def mediaserver_found(self,device):
@@ -350,7 +351,8 @@ class TreeWidget(object):
                                          Filter='*',SortCriteria='')
         d.addCallback(reply)
         d.addErrback(self.handle_error)
-        service.subscribe_for_variable('ContainerUpdateIDs',self.state_variable_change)
+        service.subscribe_for_variable('ContainerUpdateIDs',callback=self.state_variable_change)
+        service.subscribe_for_variable('SystemUpdateID',callback=self.state_variable_change)
 
     def row_expanded(self,view,iter,row_path):
         #print "row_expanded", view,iter,row_path

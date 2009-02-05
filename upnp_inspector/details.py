@@ -21,7 +21,7 @@ class DetailsWidget(log.Loggable):
         self.window.set_title('Details')
         scroll_window = gtk.ScrolledWindow()
         scroll_window.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-        self.store = gtk.ListStore(str,object)
+        self.store = gtk.TreeStore(str,object)
         self.treeview = gtk.TreeView(self.store)
         column = gtk.TreeViewColumn('Name')
         self.treeview.append_column(column)
@@ -51,9 +51,20 @@ class DetailsWidget(log.Loggable):
         self.store.clear()
         try:
             for t in object.as_tuples():
-                self.store.append(t)
+                row = self.store.append(None,t)
+                try:
+                    if isinstance(t[1][2],dict):
+                        for k,v in t[1][2].items():
+                            self.store.append(row,(k,v))
+                except (IndexError,TypeError):
+                    pass
         except AttributeError:
+            #import traceback
+            #print traceback.format_exc()
             pass
+        except Exception:
+            import traceback
+            print traceback.format_exc()
 
     def open_url(self,url):
         import webbrowser
@@ -82,7 +93,7 @@ class DetailsWidget(log.Loggable):
                 item.connect("activate", lambda w: self.clipboard.set_text(value[1]))
                 menu.append(item)
                 if(len(value) < 3 or
-                   value[2] == True):
+                   (value[2] == True or isinstance(value[2],dict))):
                     item = gtk.MenuItem("open URL")
                     item.connect("activate", lambda w: self.open_url(value[1]))
                     menu.append(item)

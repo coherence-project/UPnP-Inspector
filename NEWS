@@ -1,0 +1,10 @@
+0.2.0 - Good Morning, Starshine - 20090224
+
+ * a log-window for SSDP messages
+ * more information (DLNA class and capabilites, icons)
+   in the devices details-window
+ * the MediaServer browse-window now reacts on ContainerUpdateIds changes
+
+0.1.7 - 20090105
+
+ * first public release

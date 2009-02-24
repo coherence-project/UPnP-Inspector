@@ -1,0 +1,72 @@
+2009-02-05 21:56  dev
+
+	* upnp_inspector/log.py: yeah - missing file, as usual
+
+2009-02-05 16:14  dev
+
+	* UPnP_Inspector.egg-info/PKG-INFO, upnp_inspector/__init__.py,
+	  upnp_inspector/details.py: display information about device icons
+	  in the details window
+
+2009-01-30 20:02  dev
+
+	* upnp_inspector/mediaserver.py: react on ContainerUpdateIds
+	  changes
+
+2009-01-24 18:56  dev
+
+	* README, UPnP_Inspector.egg-info/PKG-INFO,
+	  UPnP_Inspector.egg-info/SOURCES.txt,
+	  UPnP_Inspector.egg-info/requires.txt, setup.py,
+	  upnp_inspector/__init__.py, upnp_inspector/about.py,
+	  upnp_inspector/base.py, upnp_inspector/mediaserver.py: new log
+	  window for SSDP
+
+2009-01-19 21:36  micxer
+
+	* upnp_inspector/extract.py: No more error when SMTP library is not
+	  available and mail checkbox isn't shown
+	  No more error when closing the dialog, just hide it to make it
+	  reusable by devices.py:325
+
+2009-01-05 15:35  dev
+
+	* upnp_inspector/devices.py: the lost events
+
+2009-01-04 20:10  dev
+
+	* dist: cleanup
+
+2009-01-04 20:08  dev
+
+	* ., LICENCE, MANIFEST.in, README, UPnP_Inspector.egg-info,
+	  UPnP_Inspector.egg-info/PKG-INFO,
+	  UPnP_Inspector.egg-info/SOURCES.txt,
+	  UPnP_Inspector.egg-info/dependency_links.txt,
+	  UPnP_Inspector.egg-info/entry_points.txt,
+	  UPnP_Inspector.egg-info/requires.txt,
+	  UPnP_Inspector.egg-info/top_level.txt, bin, bin/upnp-inspector,
+	  dist, dist/UPnP-Inspector-0.1.6.tar.gz, setup.py, upnp_inspector,
+	  upnp_inspector/__init__.py, upnp_inspector/about.py,
+	  upnp_inspector/base.py, upnp_inspector/details.py,
+	  upnp_inspector/devices.py, upnp_inspector/events.py,
+	  upnp_inspector/extract.py, upnp_inspector/icons,
+	  upnp_inspector/icons/audio-x-generic.png,
+	  upnp_inspector/icons/camera-web.png,
+	  upnp_inspector/icons/folder.png,
+	  upnp_inspector/icons/image-x-generic.png,
+	  upnp_inspector/icons/inspector-icon.png,
+	  upnp_inspector/icons/inspector-logo.png,
+	  upnp_inspector/icons/media-renderer.png,
+	  upnp_inspector/icons/network-light.png,
+	  upnp_inspector/icons/network-server.png,
+	  upnp_inspector/icons/printer.png,
+	  upnp_inspector/icons/upnp-action-arg-in.png,
+	  upnp_inspector/icons/upnp-action-arg-out.png,
+	  upnp_inspector/icons/upnp-action.png,
+	  upnp_inspector/icons/upnp-device.png,
+	  upnp_inspector/icons/upnp-service.png,
+	  upnp_inspector/icons/upnp-state-variable.png,
+	  upnp_inspector/icons/video-x-generic.png,
+	  upnp_inspector/mediaserver.py: The Inspector arrives
+

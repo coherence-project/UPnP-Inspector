@@ -269,8 +269,64 @@ class TreeWidget(object):
                 append(item)
 
 
-        if event.button == 3 and self.cb_item_right_click != None:
-            return self.cb_item_right_click(widget, event)
+        if event.button == 3:
+            if self.cb_item_right_click != None:
+                return self.cb_item_right_click(widget, event)
+            else:
+                store = widget.get_model()
+                iter = store.get_iter(row_path)
+                title,object_id,upnp_class = self.store.get(iter,NAME_COLUMN,ID_COLUMN,UPNP_CLASS_COLUMN)
+                if(not upnp_class.startswith('object.container') and
+                   not upnp_class == 'root'):
+                    url,didl = self.store.get(iter,SERVICE_COLUMN,DIDL_COLUMN)
+                    if url != '':
+                        print "prepare to play", url
+
+                        def handle_error(e):
+                            print 'we have an error', e
+
+                        def handle_result(r):
+                            print "done", r
+
+                        def start(r,service):
+                            print "call start", service
+                            action = service.get_action('Play')
+                            d = action.call(InstanceID=0,Speed=1)
+                            d.addCallback(handle_result)
+                            d.addErrback(handle_error)
+
+                        def set_uri(r,service,url,didl):
+                            print "call set", service,url,didl
+                            action = service.get_action('SetAVTransportURI')
+                            d = action.call(InstanceID=0,CurrentURI=url,
+                                                         CurrentURIMetaData=didl)
+                            d.addCallback(start,service)
+                            d.addErrback(handle_error)
+                            return d
+
+                        def play(service,url,didl):
+                            print "call stop", service
+                            action = service.get_action('Stop')
+                            print action
+                            d = action.call(InstanceID=0)
+                            d.addCallback(set_uri,service,url,didl)
+                            d.addErrback(handle_error)
+
+                        menu = gtk.Menu()
+                        item = gtk.MenuItem("play on MediaRenderer...")
+                        item.set_sensitive(False)
+                        menu.append(item)
+                        menu.append(gtk.SeparatorMenuItem())
+                        for device in self.coherence.devices:
+                            if device.get_device_type().split(':')[3].lower() == 'mediarenderer':
+                                item = gtk.MenuItem(device.get_friendly_name())
+                                service = device.get_service_by_type('AVTransport')
+                                item.connect("activate", lambda x: play(service,url,didl))
+                                menu.append(item)
+
+                        menu.show_all()
+                        menu.popup(None,None,None,event.button,event.time)
+                        return True
         return 0
 
     def handle_error(self,error):
@@ -427,6 +483,11 @@ class TreeWidget(object):
                         icon = self.video_icon
                     elif item.upnp_class.startswith('object.item.imageItem'):
                         icon = self.image_icon
+
+                    res = item.res.get_matching(['*:*:*:*'], protocol_type='http-get')
+                    if len(res) > 0:
+                        res = res[0]
+                        service = res.data
 
                 stored_didl = DIDLLite.DIDLElement()
                 stored_didl.addItem(item)

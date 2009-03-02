@@ -29,7 +29,7 @@ Tango Project: Creative Commons Attribution Share-Alike
 David Göthberg: Public Domain""")
         self.window.set_website('http://coherence.beebits.net')
         self.window.set_authors(['Frank Scholz <fs@beebits.net>','Michael Weinrich <testsuite@michael-weinrich.de>'])
-        self.window.set_artists(['Tango Desktop Project http://tango.freedesktop.org','David Göthberg: http://commons.wikimedia.org/wiki/User:Davidgothberg'])
+        self.window.set_artists(['Tango Desktop Project http://tango.freedesktop.org','David Göthberg: http://commons.wikimedia.org/wiki/User:Davidgothberg','Karl Vollmer: http://ampache.org'])
 
         logo = resource_filename(__name__, os.path.join('icons','inspector-logo.png'))
         logo = gtk.gdk.pixbuf_new_from_file(logo)

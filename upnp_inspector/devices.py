@@ -296,6 +296,12 @@ class DevicesWidget(log.Loggable):
                         item = gtk.MenuItem("browse MediaServer")
                         item.connect("activate", self.mediaserver_browse, object)
                         menu.append(item)
+                    if(object != None and
+                       object.get_device_type().split(':')[3].lower() == 'mediarenderer'):
+                        menu.append(gtk.SeparatorMenuItem())
+                        item = gtk.MenuItem("control MediaRendererer")
+                        item.connect("activate", self.mediarenderer_control, object)
+                        menu.append(item)
                     menu.show_all()
                     menu.popup(None,None,None,event.button,event.time)
                     return True
@@ -422,3 +428,12 @@ class DevicesWidget(log.Loggable):
             self.windows[id] = ui.window
         #ui.cb_item_right_click = self.button_pressed
         #ui.window.show_all()
+
+    def mediarenderer_control(self,widget,device):
+        from mediarenderer import MediaRendererWidget
+        id = '@'.join((device.get_usn(),'MediaRendererControl'))
+        try:
+            self.windows[id].show()
+        except:
+            ui = MediaRendererWidget(self.coherence,device)
+            self.windows[id] = ui.window

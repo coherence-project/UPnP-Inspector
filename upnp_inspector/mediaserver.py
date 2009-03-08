@@ -144,6 +144,11 @@ class TreeWidget(object):
         self.treeview = gtk.TreeView(self.store)
         self.column = gtk.TreeViewColumn('Items')
         self.treeview.append_column(self.column)
+        self.treeview.enable_model_drag_source(gtk.gdk.BUTTON1_MASK,
+                                    [('upnp/metadata', 0, 1)],
+                                    gtk.gdk.ACTION_DEFAULT | gtk.gdk.ACTION_PRIVATE)
+        self.treeview.connect("drag_data_get", self.drag_data_get_cb)
+
 
         # create a CellRenderers to render the data
         icon_cell = gtk.CellRendererPixbuf()
@@ -178,6 +183,14 @@ class TreeWidget(object):
         #self.treeview.connect('scroll-event', start_scrolling)
         self.window.set_size_request(400, 300)
         self.window.add(self.treeview)
+
+    def drag_data_get_cb(self,treeview, context, selection, info, timestamp):
+          treeselection = treeview.get_selection()
+          model, iter = treeselection.get_selected()
+          didl = model.get_value(iter, DIDL_COLUMN)
+          #print "drag_data_get_cb", didl
+          selection.set('upnp/metadata', 8, didl)
+          return
 
     def show_tooltip(self, widget, x, y, keyboard_mode, tooltip):
         if self.we_are_scrolling != None:

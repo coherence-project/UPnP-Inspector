@@ -15,9 +15,10 @@ if __name__ == '__main__':
     from twisted.internet import gtk2reactor
     gtk2reactor.install()
 from twisted.internet import reactor
+from twisted.internet import task
 
 from coherence import log
-from coherence.upnp.core.utils import parse_xml, getPage
+from coherence.upnp.core.utils import parse_xml, getPage, means_true
 
 from pkg_resources import resource_filename
 
@@ -29,15 +30,19 @@ class MediaRendererWidget(log.Loggable):
         self.device = device
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         self.window.connect("delete_event", self.hide)
-        self.window.set_default_size(400,200)
+        self.window.set_default_size(480,200)
         try:
             title = 'MediaRenderer %s' % device.get_friendly_name()
         except:
             title = 'MediaRenderer'
         self.window.set_title(title)
 
-        vbox = gtk.VBox(homogeneous=False, spacing=10)
+        self.window.drag_dest_set(gtk.DEST_DEFAULT_DROP, [('upnp/metadata', 0, 1)], gtk.gdk.ACTION_DEFAULT | gtk.gdk.ACTION_PRIVATE)
+        self.window.connect('drag_motion', self.motion_cb)
+        self.window.connect('drag_drop', self.drop_cb)
+        self.window.connect("drag_data_received", self.received_cb)
 
+        vbox = gtk.VBox(homogeneous=False, spacing=10)
 
         hbox = gtk.HBox(homogeneous=False, spacing=10)
         hbox.set_border_width(2)
@@ -64,26 +69,63 @@ class MediaRendererWidget(log.Loggable):
         textbox.pack_start(self.artist_text,False,False,2)
         hbox.pack_start(textbox,False,False,2)
 
+        seekbox = gtk.HBox(homogeneous=False, spacing=10)
+        self.position_min_text = gtk.Label("0:00")
+        self.position_min_text.set_use_markup(True)
+        seekbox.pack_start(self.position_min_text,False,False,2)
         adjustment=gtk.Adjustment(value=0, lower=0, upper=240, step_incr=1,page_incr=20)#, page_size=20)
-        scale = gtk.HScale(adjustment=adjustment)
-        scale.set_draw_value(False)
-        scale.set_sensitive(False)
-        vbox.pack_start(scale,False,False,2)
+        self.position_scale = gtk.HScale(adjustment=adjustment)
+        self.position_scale.set_draw_value(True)
+        self.position_scale.set_value_pos(gtk.POS_BOTTOM)
+        self.position_scale.set_sensitive(False)
+        self.position_scale.connect("format-value", self.format_position)
+        self.position_scale.connect('change-value',self.position_changed)
+        seekbox.pack_start(self.position_scale,True,True,2)
+        self.position_max_text = gtk.Label("0:00")
+        self.position_max_text.set_use_markup(True)
+        seekbox.pack_end(self.position_max_text,False,False,2)
+        vbox.pack_start(seekbox,False,False,2)
 
         buttonbox = gtk.HBox(homogeneous=False, spacing=10)
         #button = self.make_button('media-skip-backward.png',None,sensitive=False)
         #buttonbox.pack_start(button,False,False,2)
-        self.seek_backward_button = self.make_button('media-seek-backward.png',None,sensitive=False)
+        self.seek_backward_button = self.make_button('media-seek-backward.png',callback=self.seek_backward,sensitive=False)
         buttonbox.pack_start(self.seek_backward_button,False,False,2)
         self.stop_button = self.make_button('media-playback-stop.png',callback=self.stop,sensitive=False)
         buttonbox.pack_start(self.stop_button,False,False,2)
         self.start_button = self.make_button('media-playback-start.png',callback=self.play_or_pause,sensitive=False)
         buttonbox.pack_start(self.start_button,False,False,2)
-        self.seek_forward_button = self.make_button('media-seek-forward.png',None,sensitive=False)
+        self.seek_forward_button = self.make_button('media-seek-forward.png',callback=self.seek_forward,sensitive=False)
         buttonbox.pack_start(self.seek_forward_button,False,False,2)
         #button = self.make_button('media-skip-forward.png',None,sensitive=False)
         #buttonbox.pack_start(button,False,False,2)
-        vbox.pack_end(buttonbox,False,False,2)
+
+        hbox = gtk.HBox(homogeneous=False, spacing=10)
+        #hbox.set_size_request(240,-1)
+        adjustment=gtk.Adjustment(value=0, lower=0, upper=100, step_incr=1,page_incr=20)#, page_size=20)
+        self.volume_scale = gtk.HScale(adjustment=adjustment)
+        self.volume_scale.set_size_request(140,-1)
+        self.volume_scale.set_draw_value(False)
+        self.volume_scale.connect('change-value',self.volume_changed)
+        hbox.pack_start(self.volume_scale,False,False,2)
+        button = gtk.Button()
+        self.volume_image = gtk.Image()
+        icon = resource_filename(__name__, os.path.join('icons','audio-volume-low.png'))
+        self.volume_low_icon = gtk.gdk.pixbuf_new_from_file(icon)
+        self.volume_image.set_from_pixbuf(self.volume_low_icon)
+        button.set_image(self.volume_image)
+        button.connect("clicked", self.mute)
+
+        icon = resource_filename(__name__, os.path.join('icons','audio-volume-medium.png'))
+        self.volume_medium_icon = gtk.gdk.pixbuf_new_from_file(icon)
+        icon = resource_filename(__name__, os.path.join('icons','audio-volume-high.png'))
+        self.volume_high_icon = gtk.gdk.pixbuf_new_from_file(icon)
+        icon = resource_filename(__name__, os.path.join('icons','audio-volume-muted.png'))
+        self.volume_muted_icon = gtk.gdk.pixbuf_new_from_file(icon)
+        hbox.pack_end(button,False,False,2)
+
+        buttonbox.pack_end(hbox,False,False,2)
+        vbox.pack_start(buttonbox,False,False,2)
 
         self.pause_button_image = gtk.Image()
         icon = resource_filename(__name__, os.path.join('icons','media-playback-pause.png'))
@@ -91,14 +133,76 @@ class MediaRendererWidget(log.Loggable):
         self.pause_button_image.set_from_pixbuf(icon)
         self.start_button_image = self.start_button.get_image()
 
+        self.status_bar = gtk.Statusbar()
+        context_id = self.status_bar.get_context_id("Statusbar")
+        vbox.pack_end(self.status_bar,False,False,2)
+
         self.window.add(vbox)
         self.window.show_all()
+
+        self.position_loop = task.LoopingCall(self.get_position)
+
+        service = self.device.get_service_by_type('RenderingControl')
+        #volume_variable = service.get_state_variable('Volume')
+        #print "volume_variable",volume_variable.value
+        #try:
+        #    volume = int(volume_variable.value)
+        #    if int(scale.get_value()) != volume:
+        #        self.volume_scale.set_value(volume)
+        #except:
+        #    pass
+        service.subscribe_for_variable('Volume', callback=self.state_variable_change)
+        service.subscribe_for_variable('Mute', callback=self.state_variable_change)
 
         service = self.device.get_service_by_type('AVTransport')
         service.subscribe_for_variable('AVTransportURI', callback=self.state_variable_change)
         service.subscribe_for_variable('CurrentTrackMetaData', callback=self.state_variable_change)
         service.subscribe_for_variable('TransportState', callback=self.state_variable_change)
+        service.subscribe_for_variable('CurrentTransportActions', callback=self.state_variable_change)
 
+        service.subscribe_for_variable('AbsTime', callback=self.state_variable_change)
+        service.subscribe_for_variable('TrackDuration', callback=self.state_variable_change)
+
+        self.get_position()
+
+
+    def motion_cb(self,wid, context, x, y, time):
+        #print 'drag_motion'
+        context.drag_status(gtk.gdk.ACTION_COPY, time)
+        return True
+
+    def drop_cb(self,wid, context, x, y, time):
+        #print('\n'.join([str(t) for t in context.targets]))
+        context.finish(True, False, time)
+        return True
+
+    def received_cb(self, widget, context, x, y, selection, targetType,
+                            time):
+        #print "received_cb", targetType
+        if targetType == 1:
+            metadata = selection.data
+            print "got metadata", metadata
+            from coherence.upnp.core import DIDLLite
+            elt = DIDLLite.DIDLElement.fromString(metadata)
+            if elt.numItems() == 1:
+                service = self.device.get_service_by_type('ConnectionManager')
+                local_protocol_infos=service.get_state_variable('SinkProtocolInfo').value.split(',')
+                print local_protocol_infos
+                item = elt.getItems()[0]
+                try:
+                    res = item.res.get_matching(local_protocol_infos, protocol_type='internal')
+                    if len(res) == 0:
+                        res = item.res.get_matching(local_protocol_infos)
+                    if len(res) > 0:
+                        res = res[0]
+                        remote_protocol,remote_network,remote_content_format,_ = res.protocolInfo.split(':')
+                        d = self.stop()
+                        d.addCallback(lambda x: self.set_uri(res.data,metadata))
+                        d.addCallback(lambda x: self.play_or_pause(force_play=True))
+                        d.addErrback(self.handle_error)
+                        d.addErrback(self.handle_error)
+                except AttributeError:
+                    print "Sorry, we currently support only single items!"
 
 
     def make_button(self,icon,callback=None,sensitive=True):
@@ -146,6 +250,8 @@ class MediaRendererWidget(log.Loggable):
 
                             d = getPage(item.albumArtURI)
                             d.addCallback(got_icon)
+                        else:
+                            self.album_art_image.set_from_pixbuf(self.blank_icon)
 
 
                 except SyntaxError:
@@ -155,36 +261,156 @@ class MediaRendererWidget(log.Loggable):
                 self.title_text.set_markup('')
                 self.album_text.set_markup('')
                 self.artist_text.set_markup('')
+                self.album_art_image.set_from_pixbuf(self.blank_icon)
+
         elif variable.name == 'TransportState':
             print variable.name, 'changed from', variable.old_value, 'to', variable.value
             if variable.value == 'PLAYING':
                 self.start_button.set_image(self.pause_button_image)
-            else:
+                try:
+                    self.position_loop.start(1.0, now=True)
+                except:
+                    pass
+            elif variable.value != 'TRANSITIONING':
                 self.start_button.set_image(self.start_button_image)
+                try:
+                    self.position_loop.stop()
+                except:
+                    pass
+            if variable.value == 'STOPPED':
+                self.get_position()
+
+
+            context_id = self.status_bar.get_context_id("Statusbar")
+            self.status_bar.pop(context_id)
+            self.status_bar.push(context_id,"%s" % variable.value)
+
+        elif variable.name == 'CurrentTransportActions':
+            try:
+                actions = variable.value.split(',')
+                if 'Seek' in actions:
+                    self.position_scale.set_sensitive(True)
+                    self.seek_forward_button.set_sensitive(True)
+                    self.seek_backward_button.set_sensitive(True)
+                else:
+                    self.position_scale.set_sensitive(False)
+                    self.seek_forward_button.set_sensitive(False)
+                    self.seek_backward_button.set_sensitive(False)
+                if 'Play' in actions:
+                    self.start_button.set_sensitive(True)
+                else:
+                    self.start_button.set_sensitive(False)
+                if 'Stop' in actions:
+                    self.stop_button.set_sensitive(True)
+                else:
+                    self.stop_button.set_sensitive(False)
+            except:
+                #very unlikely to happen
+                import traceback
+                print traceback.format_exc()
 
         elif variable.name == 'AVTransportURI':
             print variable.name, 'changed from', variable.old_value, 'to', variable.value
             if variable.value != '':
+                pass
                 #self.seek_backward_button.set_sensitive(True)
-                self.stop_button.set_sensitive(True)
-                self.start_button.set_sensitive(True)
+                #self.stop_button.set_sensitive(True)
+                #self.start_button.set_sensitive(True)
                 #self.seek_forward_button.set_sensitive(True)
             else:
-                self.seek_backward_button.set_sensitive(False)
-                self.stop_button.set_sensitive(False)
-                self.start_button.set_sensitive(False)
-                self.seek_forward_button.set_sensitive(False)
+                #self.seek_backward_button.set_sensitive(False)
+                #self.stop_button.set_sensitive(False)
+                #self.start_button.set_sensitive(False)
+                #self.seek_forward_button.set_sensitive(False)
                 self.album_art_image.set_from_pixbuf(self.blank_icon)
                 self.title_text.set_markup('')
                 self.album_text.set_markup('')
                 self.artist_text.set_markup('')
 
+        elif variable.name == 'Volume':
+            try:
+                volume = int(variable.value)
+                print "volume value", volume
+                if int(self.volume_scale.get_value()) != volume:
+                    self.volume_scale.set_value(volume)
+                service = self.device.get_service_by_type('RenderingControl')
+                mute_variable = service.get_state_variable('Mute')
+                if means_true(mute_variable.value) == True:
+                    self.volume_image.set_from_pixbuf(self.volume_muted_icon)
+                elif volume < 34:
+                    self.volume_image.set_from_pixbuf(self.volume_low_icon)
+                elif volume < 67:
+                    self.volume_image.set_from_pixbuf(self.volume_medium_icon)
+                else:
+                    self.volume_image.set_from_pixbuf(self.volume_high_icon)
 
-    def play_or_pause(self):
+            except:
+                import traceback
+                print traceback.format_exc()
+                pass
+
+        elif variable.name == 'Mute':
+            service = self.device.get_service_by_type('RenderingControl')
+            volume_variable = service.get_state_variable('Volume')
+            volume = volume_variable.value
+            if means_true(variable.value) == True:
+                self.volume_image.set_from_pixbuf(self.volume_muted_icon)
+            elif volume < 34:
+                self.volume_image.set_from_pixbuf(self.volume_low_icon)
+            elif volume < 67:
+                self.volume_image.set_from_pixbuf(self.volume_medium_icon)
+            else:
+                self.volume_image.set_from_pixbuf(self.volume_high_icon)
+
+    def seek_backward(self):
+        value = self.position_scale.get_value()
+        value = int(value)
+        seconds = max(0,value-20)
+
+        hours = seconds / 3600
+        seconds = seconds - hours * 3600
+        minutes = seconds / 60
+        seconds = seconds - minutes * 60
+        target = "%d:%02d:%02d" % (hours,minutes,seconds)
+
+        def handle_result(r):
+            self.get_position()
+
+        service = self.device.get_service_by_type('AVTransport')
+        action = service.get_action('Seek')
+        d = action.call(InstanceID=0,Unit='ABS_TIME',Target=target)
+        d.addCallback(handle_result)
+        d.addErrback(self.handle_error)
+        return d
+
+    def seek_forward(self):
+        value = self.position_scale.get_value()
+        value = int(value)
+        max = int(self.position_scale.get_adjustment().upper)
+        seconds = min(max,value+20)
+
+        hours = seconds / 3600
+        seconds = seconds - hours * 3600
+        minutes = seconds / 60
+        seconds = seconds - minutes * 60
+        target = "%d:%02d:%02d" % (hours,minutes,seconds)
+
+        def handle_result(r):
+            self.get_position()
+
+        service = self.device.get_service_by_type('AVTransport')
+        action = service.get_action('Seek')
+        d = action.call(InstanceID=0,Unit='ABS_TIME',Target=target)
+        d.addCallback(handle_result)
+        d.addErrback(self.handle_error)
+        return d
+
+    def play_or_pause(self,force_play=False):
+        print "play_or_pause"
         service = self.device.get_service_by_type('AVTransport')
         variable = service.get_state_variable('TransportState', instance=0)
         print variable.value
-        if variable.value != 'PLAYING':
+        if force_play == True or variable.value != 'PLAYING':
             action = service.get_action('Play')
             d = action.call(InstanceID=0,Speed=1)
         else:
@@ -192,19 +418,136 @@ class MediaRendererWidget(log.Loggable):
             d = action.call(InstanceID=0)
         d.addCallback(self.handle_result)
         d.addErrback(self.handle_error)
+        return d
 
     def stop(self):
+        print "stop"
         service = self.device.get_service_by_type('AVTransport')
         action = service.get_action('Stop')
         d = action.call(InstanceID=0)
         d.addCallback(self.handle_result)
         d.addErrback(self.handle_error)
+        return d
+
+    def set_uri(self,url,didl):
+        print "set_uri %s %r" % (url,didl)
+        service = self.device.get_service_by_type('AVTransport')
+        action = service.get_action('SetAVTransportURI')
+        d = action.call(InstanceID=0,CurrentURI=url,
+                                     CurrentURIMetaData=didl)
+        d.addCallback(self.handle_result)
+        d.addErrback(self.handle_error)
+        return d
+
+
+    def position_changed(self,range,scroll,value):
+        adjustment = range.get_adjustment()
+        value = int(value)
+        max = int(adjustment.upper)
+        seconds = min(max,value)
+
+        hours = seconds / 3600
+        seconds = seconds - hours * 3600
+        minutes = seconds / 60
+        seconds = seconds - minutes * 60
+        target = "%d:%02d:%02d" % (hours,minutes,seconds)
+
+        service = self.device.get_service_by_type('AVTransport')
+        action = service.get_action('Seek')
+        d = action.call(InstanceID=0,Unit='ABS_TIME',Target=target)
+        d.addCallback(self.handle_result)
+        d.addErrback(self.handle_error)
+
+    def format_position(self,scale,value):
+        seconds = int(value)
+        hours = seconds / 3600
+        seconds = seconds - hours * 3600
+        minutes = seconds / 60
+        seconds = seconds - minutes * 60
+        if hours > 0:
+            return "%d:%02d:%02d" % (hours,minutes,seconds)
+        else:
+            return "%d:%02d" % (minutes,seconds)
+
+    def get_position(self):
+
+        def handle_result(r,service):
+            try:
+                duration = r['TrackDuration']
+                h,m,s = duration.split(':')
+                if int(h) > 0:
+                    duration = '%d:%02d:%02d' % (int(h),int(m),int(s))
+                else:
+                    duration = '%d:%02d' % (int(m),int(s))
+                max = (int(h) * 3600) + (int(m)*60) + int(s)
+                self.position_scale.set_range(0,max)
+                self.position_max_text.set_markup(duration)
+                actions = service.get_state_variable('CurrentTransportActions')
+                actions = actions.value.split(',')
+                if 'Seek' in actions:
+                    self.position_scale.set_sensitive(True)
+            except:
+                import traceback
+                print traceback.format_exc()
+                self.position_scale.set_range(0,0)
+                self.position_max_text.set_markup('0:00')
+                self.position_scale.set_sensitive(False)
+                pass
+
+            try:
+                position = r['AbsTime']
+                h,m,s = position.split(':')
+                position = (int(h) * 3600) + (int(m)*60) + int(s)
+                self.position_scale.set_value(position)
+            except:
+                #import traceback
+                #print traceback.format_exc()
+                pass
+
+        service = self.device.get_service_by_type('AVTransport')
+        action = service.get_action('GetPositionInfo')
+        d = action.call(InstanceID=0)
+        d.addCallback(handle_result,service)
+        d.addErrback(self.handle_error)
+        return d
+
+    def volume_changed(self,range,scroll,value):
+        value = int(value)
+        if value > 100:
+            value = 100
+        print "volume changed", value
+        service = self.device.get_service_by_type('RenderingControl')
+        action = service.get_action('SetVolume')
+        d = action.call(InstanceID=0,
+                    Channel='Master',
+                    DesiredVolume=value)
+        d.addCallback(self.handle_result)
+        d.addErrback(self.handle_error)
+        return d
+
+    def mute(self,w):
+        service = self.device.get_service_by_type('RenderingControl')
+        action = service.get_action('SetMute')
+        mute_variable = service.get_state_variable('Mute')
+        if means_true(mute_variable.value) == False:
+            new_mute = '1'
+        else:
+            new_mute = '0'
+        print "Mute new:", new_mute
+        d = action.call(InstanceID=0,
+                        Channel='Master',
+                        DesiredMute=new_mute)
+        d.addCallback(self.handle_result)
+        d.addErrback(self.handle_error)
+        return d
 
     def handle_error(self,e):
         print 'we have an error', e
+        return e
 
     def handle_result(self,r):
         print "done", r
+        return r
 
 if __name__ == '__main__':
 

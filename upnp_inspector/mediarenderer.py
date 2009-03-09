@@ -181,13 +181,13 @@ class MediaRendererWidget(log.Loggable):
         #print "received_cb", targetType
         if targetType == 1:
             metadata = selection.data
-            print "got metadata", metadata
+            #print "got metadata", metadata
             from coherence.upnp.core import DIDLLite
             elt = DIDLLite.DIDLElement.fromString(metadata)
             if elt.numItems() == 1:
                 service = self.device.get_service_by_type('ConnectionManager')
                 local_protocol_infos=service.get_state_variable('SinkProtocolInfo').value.split(',')
-                print local_protocol_infos
+                #print local_protocol_infos
                 item = elt.getItems()[0]
                 try:
                     res = item.res.get_matching(local_protocol_infos, protocol_type='internal')
@@ -487,9 +487,12 @@ class MediaRendererWidget(log.Loggable):
                 if 'Seek' in actions:
                     self.position_scale.set_sensitive(True)
             except:
-                import traceback
-                print traceback.format_exc()
-                self.position_scale.set_range(0,0)
+                #import traceback
+                #print traceback.format_exc()
+                try:
+                    self.position_scale.set_range(0,0)
+                except:
+                    pass
                 self.position_max_text.set_markup('0:00')
                 self.position_scale.set_sensitive(False)
                 pass

@@ -50,6 +50,6 @@ This 0.2.0 - Good Morning, Starshine - release includes
         'upnp_inspector': ['icons/*.png'],
     },
     install_requires=[
-    'Coherence >= 0.6.2',
+    'Coherence >= 0.6.3',
     ]
 )

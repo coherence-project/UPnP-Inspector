@@ -459,6 +459,7 @@ class TreeWidget(object):
         def reply(r):
             #print "browse_reply - %s of %s returned" % (r['NumberReturned'],r['TotalMatches'])
             from coherence.upnp.core import DIDLLite
+            from coherence.extern.et import ET
 
             child = self.store.iter_children(iter)
             if child:
@@ -472,8 +473,13 @@ class TreeWidget(object):
                 self.store.set_value(iter,NAME_COLUMN, "%s(%d)" % (title,int(r['TotalMatches'])))
             except ValueError:
                 pass
-            didl = DIDLLite.DIDLElement.fromString(r['Result'])
-            for item in didl.getItems():
+            elt = parse_xml(r['Result'], 'utf-8')
+            elt = elt.getroot()
+            for child in elt:
+                #stored_didl_string = DIDLLite.element_to_didl(child)
+                stored_didl_string = DIDLLite.element_to_didl(ET.tostring(child))
+                didl = DIDLLite.DIDLElement.fromString(stored_didl_string)
+                item = didl.getItems()[0]
                 #print item.title, item.id, item.upnp_class
                 if item.upnp_class.startswith('object.container'):
                     icon = self.folder_icon
@@ -502,9 +508,7 @@ class TreeWidget(object):
                         res = res[0]
                         service = res.data
 
-                stored_didl = DIDLLite.DIDLElement()
-                stored_didl.addItem(item)
-                new_iter = self.store.append(iter, (title,item.id,item.upnp_class,child_count,'',service,icon,stored_didl.toString(),None))
+                new_iter = self.store.append(iter, (title,item.id,item.upnp_class,child_count,'',service,icon,stored_didl_string,None))
                 if item.upnp_class.startswith('object.container'):
                     self.store.append(new_iter, ('...loading...','','placeholder',-1,'','',None,'',None))
 

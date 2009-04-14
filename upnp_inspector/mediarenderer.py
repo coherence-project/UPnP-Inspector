@@ -287,8 +287,8 @@ class MediaRendererWidget(log.Loggable):
 
         elif variable.name == 'CurrentTransportActions':
             try:
-                actions = variable.value.split(',')
-                if 'Seek' in actions:
+                actions = map(lambda x: x.upper(),variable.value.split(','))
+                if 'SEEK' in actions:
                     self.position_scale.set_sensitive(True)
                     self.seek_forward_button.set_sensitive(True)
                     self.seek_backward_button.set_sensitive(True)
@@ -296,11 +296,11 @@ class MediaRendererWidget(log.Loggable):
                     self.position_scale.set_sensitive(False)
                     self.seek_forward_button.set_sensitive(False)
                     self.seek_backward_button.set_sensitive(False)
-                if 'Play' in actions:
+                if 'PLAY' in actions:
                     self.start_button.set_sensitive(True)
                 else:
                     self.start_button.set_sensitive(False)
-                if 'Stop' in actions:
+                if 'STOP' in actions:
                     self.stop_button.set_sensitive(True)
                 else:
                     self.stop_button.set_sensitive(False)
@@ -484,7 +484,7 @@ class MediaRendererWidget(log.Loggable):
                 self.position_max_text.set_markup(duration)
                 actions = service.get_state_variable('CurrentTransportActions')
                 actions = actions.value.split(',')
-                if 'Seek' in actions:
+                if 'SEEK' in actions:
                     self.position_scale.set_sensitive(True)
             except:
                 #import traceback

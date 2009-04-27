@@ -584,4 +584,6 @@ class MediaServerWidget(log.Loggable):
 
     def hide(self,w,e):
         w.hide()
+        self.ui.store.clear()
+        self.ui.mediaserver_found(self.device)
         return True

@@ -289,9 +289,18 @@ class TreeWidget(object):
                 store = widget.get_model()
                 iter = store.get_iter(row_path)
                 title,object_id,upnp_class = self.store.get(iter,NAME_COLUMN,ID_COLUMN,UPNP_CLASS_COLUMN)
-                if(not upnp_class.startswith('object.container') and
-                   not upnp_class == 'root'):
+                if upnp_class != 'root':
                     url,didl = self.store.get(iter,SERVICE_COLUMN,DIDL_COLUMN)
+                    if upnp_class.startswith('object.container'):
+                        from coherence.upnp.core import DIDLLite
+                        url = ''
+                        item = DIDLLite.DIDLElement.fromString(didl).getItems()[0]
+                        res = item.res.get_matching(['*:*:*:*'], protocol_type='http-get')
+                        if len(res) > 0:
+                            for r in res:
+                                if r.data.startswith('dlna-playcontainer://'):
+                                    url = r.data
+                                    break
                     if url != '':
                         print "prepare to play", url
 

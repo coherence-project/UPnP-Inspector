@@ -289,6 +289,27 @@ class TreeWidget(object):
                 store = widget.get_model()
                 iter = store.get_iter(row_path)
                 title,object_id,upnp_class = self.store.get(iter,NAME_COLUMN,ID_COLUMN,UPNP_CLASS_COLUMN)
+                menu = None
+
+                if upnp_class == 'root' or upnp_class.startswith('object.container'):
+
+                    def refresh(treeview,path):
+                        expanded = treeview.row_expanded(path)
+                        store = treeview.get_model()
+                        iter = store.get_iter(row_path)
+                        child = store.iter_children(iter)
+                        while child:
+                            store.remove(child)
+                            child = store.iter_children(iter)
+                        self.browse(treeview,path,None,
+                                    starting_index=0,requested_count=0,force=True,expand=expanded)
+
+
+                    menu = gtk.Menu()
+                    item = gtk.MenuItem("refresh container")
+                    item.connect("activate", lambda x: refresh(widget,row_path))
+                    menu.append(item)
+
                 if upnp_class != 'root':
                     url,didl = self.store.get(iter,SERVICE_COLUMN,DIDL_COLUMN)
                     if upnp_class.startswith('object.container'):
@@ -334,7 +355,11 @@ class TreeWidget(object):
                             d.addCallback(set_uri,service,url,didl)
                             d.addErrback(handle_error)
 
-                        menu = gtk.Menu()
+                        if menu == None:
+                            menu = gtk.Menu()
+                        else:
+                            menu.append(gtk.SeparatorMenuItem())
+
                         item = gtk.MenuItem("play on MediaRenderer...")
                         item.set_sensitive(False)
                         menu.append(item)
@@ -346,9 +371,10 @@ class TreeWidget(object):
                                 item.connect("activate", lambda x: play(service,url,didl))
                                 menu.append(item)
 
-                        menu.show_all()
-                        menu.popup(None,None,None,event.button,event.time)
-                        return True
+                if menu != None:
+                    menu.show_all()
+                    menu.popup(None,None,None,event.button,event.time)
+                    return True
         return 0
 
     def handle_error(self,error):

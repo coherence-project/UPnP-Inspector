@@ -46,6 +46,10 @@ class Inspector(log.Loggable):
         vbox = gtk.VBox(homogeneous=False, spacing=0)
         menu_bar = gtk.MenuBar()
         menu = gtk.Menu()
+        refresh_item = gtk.MenuItem("Rediscover Devices")
+        refresh_item.connect("activate", self.refresh_devices)
+        menu.append(refresh_item)
+        menu.append(gtk.SeparatorMenuItem())
         quit_item = gtk.MenuItem("Quit")
         menu.append(quit_item)
         quit_item.connect("activate", lambda x: reactor.stop())
@@ -143,6 +147,15 @@ class Inspector(log.Loggable):
         self.log_widget.window.hide()
         self.show_log_item.set_active(False)
         return True
+
+    def refresh_devices(self,w):
+        """ FIXME - this is something that's actually useful in the main Coherence class too
+        """
+        for item in self.coherence.ssdp_server.known.values():
+            if item['MANIFESTATION'] == 'remote':
+                self.coherence.ssdp_server.unRegister(item['USN'])
+        self.coherence.msearch.double_discover()
+
 
     def show_about_widget(self,w,hint):
         AboutWidget()

@@ -87,8 +87,8 @@ class MediaRendererWidget(log.Loggable):
         vbox.pack_start(seekbox,False,False,2)
 
         buttonbox = gtk.HBox(homogeneous=False, spacing=10)
-        #button = self.make_button('media-skip-backward.png',None,sensitive=False)
-        #buttonbox.pack_start(button,False,False,2)
+        self.prev_button = self.make_button('media-skip-backward.png',self.skip_backward,sensitive=False)
+        buttonbox.pack_start(self.prev_button,False,False,2)
         self.seek_backward_button = self.make_button('media-seek-backward.png',callback=self.seek_backward,sensitive=False)
         buttonbox.pack_start(self.seek_backward_button,False,False,2)
         self.stop_button = self.make_button('media-playback-stop.png',callback=self.stop,sensitive=False)
@@ -97,8 +97,8 @@ class MediaRendererWidget(log.Loggable):
         buttonbox.pack_start(self.start_button,False,False,2)
         self.seek_forward_button = self.make_button('media-seek-forward.png',callback=self.seek_forward,sensitive=False)
         buttonbox.pack_start(self.seek_forward_button,False,False,2)
-        #button = self.make_button('media-skip-forward.png',None,sensitive=False)
-        #buttonbox.pack_start(button,False,False,2)
+        self.next_button = self.make_button('media-skip-forward.png',self.skip_forward,sensitive=False)
+        buttonbox.pack_start(self.next_button,False,False,2)
 
         hbox = gtk.HBox(homogeneous=False, spacing=10)
         #hbox.set_size_request(240,-1)
@@ -296,14 +296,10 @@ class MediaRendererWidget(log.Loggable):
                     self.position_scale.set_sensitive(False)
                     self.seek_forward_button.set_sensitive(False)
                     self.seek_backward_button.set_sensitive(False)
-                if 'PLAY' in actions:
-                    self.start_button.set_sensitive(True)
-                else:
-                    self.start_button.set_sensitive(False)
-                if 'STOP' in actions:
-                    self.stop_button.set_sensitive(True)
-                else:
-                    self.stop_button.set_sensitive(False)
+                self.start_button.set_sensitive('PLAY' in actions)
+                self.stop_button.set_sensitive('STOP' in actions)
+                self.prev_button.set_sensitive('PREVIOUS' in actions)
+                self.next_button.set_sensitive('NEXT' in actions)
             except:
                 #very unlikely to happen
                 import traceback
@@ -424,6 +420,22 @@ class MediaRendererWidget(log.Loggable):
         print "stop"
         service = self.device.get_service_by_type('AVTransport')
         action = service.get_action('Stop')
+        d = action.call(InstanceID=0)
+        d.addCallback(self.handle_result)
+        d.addErrback(self.handle_error)
+        return d
+
+    def skip_backward(self):
+        service = self.device.get_service_by_type('AVTransport')
+        action = service.get_action('Previous')
+        d = action.call(InstanceID=0)
+        d.addCallback(self.handle_result)
+        d.addErrback(self.handle_error)
+        return d
+
+    def skip_forward(self):
+        service = self.device.get_service_by_type('AVTransport')
+        action = service.get_action('Next')
         d = action.call(InstanceID=0)
         d.addCallback(self.handle_result)
         d.addErrback(self.handle_error)

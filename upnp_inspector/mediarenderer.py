@@ -495,12 +495,15 @@ class MediaRendererWidget(log.Loggable):
                 self.position_scale.set_range(0,max)
                 self.position_max_text.set_markup(duration)
                 actions = service.get_state_variable('CurrentTransportActions')
-                actions = actions.value.split(',')
-                if 'SEEK' in actions:
-                    self.position_scale.set_sensitive(True)
+                try:
+                    actions = actions.value.split(',')
+                    if 'SEEK' in actions:
+                        self.position_scale.set_sensitive(True)
+                except AttributeError:
+                    pass
             except:
-                #import traceback
-                #print traceback.format_exc()
+                import traceback
+                print traceback.format_exc()
                 try:
                     self.position_scale.set_range(0,0)
                 except:

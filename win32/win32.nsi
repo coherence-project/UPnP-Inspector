@@ -1,7 +1,7 @@
 
 ; global defines
 !define INSPECTOR_VERSION "0.2.0" 
-!define INSTALLER_VERSION "beta3"
+!define INSTALLER_VERSION "beta5"
 !define GTK_RUNTIME_INSTALLER			"gtk2-runtime*.exe"
 !define GTK_MIN_VERSION					"2.6.10"
 !define GTK_REG_KEY						"SOFTWARE\GTK\2.0"
@@ -39,6 +39,8 @@ XPStyle on
 !insertmacro VersionCompare
 !insertmacro WordFind
 !insertmacro un.WordFind
+
+!define MUI_Icon "inspector-icon.ico"
 
 ; -----------------------------------
 ; THE MENU

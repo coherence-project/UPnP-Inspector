@@ -6,6 +6,7 @@
 # Copyright 2009 - Frank Scholz <coherence@beebits.net>
 
 import os
+import tempfile
 
 from twisted.internet import defer
 from twisted.internet import protocol
@@ -91,6 +92,7 @@ class Extract(object):
         self.device = device
         self.window = gtk.Dialog(title="Extracting XMl descriptions",
                             parent=None,flags=0,buttons=None)
+        self.window.connect("delete_event", self.hide)
         label = gtk.Label("Extracting XMl device and service descriptions\nfrom %s @ %s" % (device.friendly_name, device.host))
         self.window.vbox.pack_start(label, True, True, 10)
         tar_button = gtk.CheckButton("tar.gz them")
@@ -118,12 +120,16 @@ class Extract(object):
     def _toggle_tar(self,w):
         self.email_button.set_sensitive(w.get_active())
 
+    def hide(self,w,e):
+        w.hide()
+        return True
+
     def extract(self,w,make_tar):
         print w, make_tar
         self.progressbar.pulse()
         try:
             l = []
-            path = FilePath('/tmp')
+            path = FilePath(tempfile.gettempdir())
 
             def device_extract(workdevice, workpath):
                 tmp_dir = workpath.child(workdevice.get_uuid())
@@ -147,7 +153,7 @@ class Extract(object):
             def finished(result):
                 uuid = self.device.get_uuid()
                 print "extraction of device %s finished" % uuid
-                print "files have been saved to /tmp/%s" % uuid
+                print "files have been saved to %s" % os.path.join(tempfile.gettempdir(),uuid)
                 if make_tar == True:
                     tgz_file = self.create_tgz(path.child(uuid))
                     if haz_smtp == True and self.email_button.get_active() == True:
@@ -169,7 +175,7 @@ class Extract(object):
         cwd = os.getcwd()
         os.chdir(path.dirname())
         import tarfile
-        tgz_file = os.path.join('/tmp',path.basename()+'.tgz')
+        tgz_file = os.path.join(tempfile.gettempdir(),path.basename()+'.tgz')
         tar = tarfile.open(tgz_file, "w:gz")
         for file in path.children():
             tar.add(os.path.join(path.basename(),file.basename()))

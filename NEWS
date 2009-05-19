@@ -1,3 +1,14 @@
+0.2.2 - Let the Sunshine In - 20090519
+
+ * a control-window for UPnP A/V MediaRenderers
+ * Drag 'n Drop functionality from the MediaServer Browse window
+   to the MediaRenderer control
+ * a 'Rediscover Devices' menu item
+ * a 'Refreshing Container' context menu item and an overall refresh
+   upon closing the MediaServer Browse window
+ * support for dlna-playcontainer URIs
+ * displaying all elements from a DIDLLite fragment
+
 0.2.0 - Good Morning, Starshine - 20090224
 
  * a log-window for SSDP messages

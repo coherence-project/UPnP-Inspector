@@ -1,7 +1,7 @@
 
 ; global defines
-!define INSPECTOR_VERSION "0.2.0" 
-!define INSTALLER_VERSION "beta5"
+!define INSPECTOR_VERSION "0.2.2" 
+!define INSTALLER_VERSION "1"
 !define GTK_RUNTIME_INSTALLER			"gtk2-runtime*.exe"
 !define GTK_MIN_VERSION					"2.6.10"
 !define GTK_REG_KEY						"SOFTWARE\GTK\2.0"
@@ -17,7 +17,7 @@ Var ISSILENT
 SetCompress force
 SetCompressor /SOLID lzma
 
-Name "UPnP Inspector ${INSPECTOR_VERSION}"
+Name "UPnP Inspector"
 OutFile "UPnPInspector-${INSPECTOR_VERSION}-${INSTALLER_VERSION}-setup.exe"
 
 InstallDir "$PROGRAMFILES\UPnPInspector"

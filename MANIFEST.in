@@ -1,1 +1,2 @@
 recursive-exclude debian *
+recursive-include misc *

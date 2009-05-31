@@ -456,7 +456,7 @@ class MediaRendererWidget(log.Loggable):
         adjustment = range.get_adjustment()
         value = int(value)
         max = int(adjustment.upper)
-        seconds = min(max,value)
+        seconds = target_seconds = min(max,value)
 
         hours = seconds / 3600
         seconds = seconds - hours * 3600
@@ -465,8 +465,31 @@ class MediaRendererWidget(log.Loggable):
         target = "%d:%02d:%02d" % (hours,minutes,seconds)
 
         service = self.device.get_service_by_type('AVTransport')
+
+        seek_modes = service.get_state_variable('A_ARG_TYPE_SeekMode').allowed_values
+        unit = 'ABS_TIME'
+        if 'ABS_TIME' not in seek_modes:
+            if 'REL_TIME' in seek_modes:
+                unit = 'REL_TIME'
+                service = self.device.get_service_by_type('AVTransport')
+                position = service.get_state_variable('AbsoluteTimePosition').value
+                h,m,s = position.split(':')
+                position = (int(h) * 3600) + (int(m)*60) + int(s)
+                seconds = target_seconds - position
+
+                sign = '+'
+                if seconds > 0:
+                    sign = '-'
+                    seconds = seconds * -1
+
+                hours = seconds / 3600
+                seconds = seconds - hours * 3600
+                minutes = seconds / 60
+                seconds = seconds - minutes * 60
+                target = "%s%d:%02d:%02d" % (sign,hours,minutes,seconds)
+
         action = service.get_action('Seek')
-        d = action.call(InstanceID=0,Unit='ABS_TIME',Target=target)
+        d = action.call(InstanceID=0,Unit=unit,Target=target)
         d.addCallback(self.handle_result)
         d.addErrback(self.handle_error)
 
@@ -502,8 +525,8 @@ class MediaRendererWidget(log.Loggable):
                 except AttributeError:
                     pass
             except:
-                import traceback
-                print traceback.format_exc()
+                #import traceback
+                #print traceback.format_exc()
                 try:
                     self.position_scale.set_range(0,0)
                 except:
@@ -523,11 +546,15 @@ class MediaRendererWidget(log.Loggable):
                 pass
 
         service = self.device.get_service_by_type('AVTransport')
-        action = service.get_action('GetPositionInfo')
-        d = action.call(InstanceID=0)
-        d.addCallback(handle_result,service)
-        d.addErrback(self.handle_error)
-        return d
+        try:
+            action = service.get_action('GetPositionInfo')
+            d = action.call(InstanceID=0)
+            d.addCallback(handle_result,service)
+            d.addErrback(self.handle_error)
+            return d
+        except AttributeError:
+            # the device and its services are gone
+            pass
 
     def volume_changed(self,range,scroll,value):
         value = int(value)

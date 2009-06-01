@@ -140,6 +140,8 @@ class MediaRendererWidget(log.Loggable):
         self.window.add(vbox)
         self.window.show_all()
 
+        self.seeking = False
+
         self.position_loop = task.LoopingCall(self.get_position)
 
         service = self.device.get_service_by_type('RenderingControl')
@@ -164,7 +166,6 @@ class MediaRendererWidget(log.Loggable):
         service.subscribe_for_variable('TrackDuration', callback=self.state_variable_change)
 
         self.get_position()
-
 
     def motion_cb(self,wid, context, x, y, time):
         #print 'drag_motion'
@@ -359,6 +360,7 @@ class MediaRendererWidget(log.Loggable):
                 self.volume_image.set_from_pixbuf(self.volume_high_icon)
 
     def seek_backward(self):
+        self.seeking = True
         value = self.position_scale.get_value()
         value = int(value)
         seconds = max(0,value-20)
@@ -370,16 +372,26 @@ class MediaRendererWidget(log.Loggable):
         target = "%d:%02d:%02d" % (hours,minutes,seconds)
 
         def handle_result(r):
-            self.get_position()
+            self.seeking = False
+            #self.get_position()
 
         service = self.device.get_service_by_type('AVTransport')
+        seek_modes = service.get_state_variable('A_ARG_TYPE_SeekMode').allowed_values
+        unit = 'ABS_TIME'
+        if 'ABS_TIME' not in seek_modes:
+            if 'REL_TIME' in seek_modes:
+                unit = 'REL_TIME'
+                target = "-%d:%02d:%02d" % (0,0,20)
+                print "rel-seek", unit, target
+
         action = service.get_action('Seek')
-        d = action.call(InstanceID=0,Unit='ABS_TIME',Target=target)
+        d = action.call(InstanceID=0,Unit=unit,Target=target)
         d.addCallback(handle_result)
         d.addErrback(self.handle_error)
         return d
 
     def seek_forward(self):
+        self.seeking = True
         value = self.position_scale.get_value()
         value = int(value)
         max = int(self.position_scale.get_adjustment().upper)
@@ -392,11 +404,20 @@ class MediaRendererWidget(log.Loggable):
         target = "%d:%02d:%02d" % (hours,minutes,seconds)
 
         def handle_result(r):
-            self.get_position()
+            self.seeking = False
+            #self.get_position()
 
         service = self.device.get_service_by_type('AVTransport')
+        seek_modes = service.get_state_variable('A_ARG_TYPE_SeekMode').allowed_values
+        unit = 'ABS_TIME'
+        if 'ABS_TIME' not in seek_modes:
+            if 'REL_TIME' in seek_modes:
+                unit = 'REL_TIME'
+                target = "+%d:%02d:%02d" % (0,0,20)
+                print "rel-seek", unit, target
+
         action = service.get_action('Seek')
-        d = action.call(InstanceID=0,Unit='ABS_TIME',Target=target)
+        d = action.call(InstanceID=0,Unit=unit,Target=target)
         d.addCallback(handle_result)
         d.addErrback(self.handle_error)
         return d
@@ -453,6 +474,17 @@ class MediaRendererWidget(log.Loggable):
 
 
     def position_changed(self,range,scroll,value):
+
+        old_value = self.position_scale.get_value()
+        #print "position_changed", old_value,value
+        new_value = value - old_value
+        #print "position_changed to ", new_value
+        if new_value < 0 and new_value > -1.0:
+            return
+        if new_value >= 0 and new_value < 1.0:
+            return
+
+        self.seeking = True
         adjustment = range.get_adjustment()
         value = int(value)
         max = int(adjustment.upper)
@@ -471,14 +503,10 @@ class MediaRendererWidget(log.Loggable):
         if 'ABS_TIME' not in seek_modes:
             if 'REL_TIME' in seek_modes:
                 unit = 'REL_TIME'
-                service = self.device.get_service_by_type('AVTransport')
-                position = service.get_state_variable('AbsoluteTimePosition').value
-                h,m,s = position.split(':')
-                position = (int(h) * 3600) + (int(m)*60) + int(s)
-                seconds = target_seconds - position
+                seconds = int(new_value)
 
                 sign = '+'
-                if seconds > 0:
+                if seconds < 0:
                     sign = '-'
                     seconds = seconds * -1
 
@@ -487,10 +515,15 @@ class MediaRendererWidget(log.Loggable):
                 minutes = seconds / 60
                 seconds = seconds - minutes * 60
                 target = "%s%d:%02d:%02d" % (sign,hours,minutes,seconds)
+                print "rel-seek", unit, target
+
+        def handle_result(r):
+            self.seeking = False
+            #self.get_position()
 
         action = service.get_action('Seek')
         d = action.call(InstanceID=0,Unit=unit,Target=target)
-        d.addCallback(self.handle_result)
+        d.addCallback(handle_result)
         d.addErrback(self.handle_error)
 
     def format_position(self,scale,value):
@@ -505,6 +538,9 @@ class MediaRendererWidget(log.Loggable):
             return "%d:%02d" % (minutes,seconds)
 
     def get_position(self):
+
+        if self.seeking == True:
+            return
 
         def handle_result(r,service):
             try:
@@ -536,10 +572,11 @@ class MediaRendererWidget(log.Loggable):
                 pass
 
             try:
-                position = r['AbsTime']
-                h,m,s = position.split(':')
-                position = (int(h) * 3600) + (int(m)*60) + int(s)
-                self.position_scale.set_value(position)
+                if self.seeking == False:
+                    position = r['AbsTime']
+                    h,m,s = position.split(':')
+                    position = (int(h) * 3600) + (int(m)*60) + int(s)
+                    self.position_scale.set_value(position)
             except:
                 #import traceback
                 #print traceback.format_exc()

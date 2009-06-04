@@ -239,18 +239,27 @@ class MediaRendererWidget(log.Loggable):
                             self.artist_text.set_markup("<i>%s</i>" % item.artist)
                         else:
                             self.artist_text.set_markup("")
-                        if item.albumArtURI != None:
-                            def got_icon(icon):
-                                icon = icon[0]
-                                icon_loader = gtk.gdk.PixbufLoader()
-                                icon_loader.write(icon)
-                                icon_loader.close()
-                                icon = icon_loader.get_pixbuf()
-                                icon = icon.scale_simple(128,128,gtk.gdk.INTERP_BILINEAR)
-                                self.album_art_image.set_from_pixbuf(icon)
 
+                        def got_icon(icon):
+                            icon = icon[0]
+                            icon_loader = gtk.gdk.PixbufLoader()
+                            icon_loader.write(icon)
+                            icon_loader.close()
+                            icon = icon_loader.get_pixbuf()
+                            icon = icon.scale_simple(128,128,gtk.gdk.INTERP_BILINEAR)
+                            self.album_art_image.set_from_pixbuf(icon)
+
+                        if item.upnp_class.startswith('object.item.audioItem') and item.albumArtURI != None:
                             d = getPage(item.albumArtURI)
                             d.addCallback(got_icon)
+                        elif item.upnp_class.startswith('object.item.imageItem'):
+                            res = item.res.get_matching('http-get:*:image/:*')
+                            if len(res) > 0:
+                                res = res[0]
+                                d = getPage(res.data)
+                                d.addCallback(got_icon)
+                            else:
+                                self.album_art_image.set_from_pixbuf(self.blank_icon)
                         else:
                             self.album_art_image.set_from_pixbuf(self.blank_icon)
 
@@ -267,7 +276,9 @@ class MediaRendererWidget(log.Loggable):
         elif variable.name == 'TransportState':
             print variable.name, 'changed from', variable.old_value, 'to', variable.value
             if variable.value == 'PLAYING':
-                self.start_button.set_image(self.pause_button_image)
+                service = self.device.get_service_by_type('AVTransport')
+                if 'Pause' in service.get_actions():
+                    self.start_button.set_image(self.pause_button_image)
                 try:
                     self.position_loop.start(1.0, now=True)
                 except:

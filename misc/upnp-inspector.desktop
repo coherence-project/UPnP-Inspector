@@ -1,7 +1,7 @@
 [Desktop Entry]
 Version=1.0
-Categories=Development
-Icon=inspector.xpm
+Categories=Development;
+Icon=inspector
 Exec=upnp-inspector
 StartupNotify=false
 Terminal=false

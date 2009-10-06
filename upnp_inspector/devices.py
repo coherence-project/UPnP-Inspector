@@ -381,10 +381,10 @@ class DevicesWidget(log.Loggable):
         d.addCallback(populate,out_entries)
         d.addErrback(fail)
 
-    def device_found(self,device=None):
+    def device_found(self,device=None,row=None):
         self.info(device.get_friendly_name(), device.get_usn(), device.get_device_type().split(':')[3].lower(), device.get_device_type())
         name = '%s (%s)' % (device.get_friendly_name(), ':'.join(device.get_device_type().split(':')[3:5]))
-        item = self.store.append(None, (DEVICE,name,device.get_usn(),
+        item = self.store.append(row, (DEVICE,name,device.get_usn(),
                                         self.icons.get(device.get_device_type().split(':')[3].lower(),self.icons['device']),
                                         device))
         for service in device.services:
@@ -401,9 +401,11 @@ class DevicesWidget(log.Loggable):
                 for argument in action.get_out_arguments():
                     self.store.append(action_item,(ARGUMENT,argument.name,'',self.action_arg_out_icon,argument))
 
+        for embedded_device in device.devices:
+            self.device_found(embedded_device,row=item)
 
     def device_removed(self,usn=None):
-        self.info(usn)
+        self.info('device_removed %r' % usn)
         row_count = 0
         for row in self.store:
             if usn == row[UDN_COLUMN]:

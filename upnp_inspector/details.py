@@ -49,6 +49,8 @@ class DetailsWidget(log.Loggable):
 
     def refresh(self,object):
         self.store.clear()
+        if object == None:
+            return
         try:
             for t in object.as_tuples():
                 row = self.store.append(None,t)

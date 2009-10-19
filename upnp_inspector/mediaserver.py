@@ -332,14 +332,14 @@ class TreeWidget(object):
                             print "done", r
 
                         def start(r,service):
-                            print "call start", service
+                            print "call start", service, service.device.get_friendly_name()
                             action = service.get_action('Play')
                             d = action.call(InstanceID=0,Speed=1)
                             d.addCallback(handle_result)
                             d.addErrback(handle_error)
 
                         def set_uri(r,service,url,didl):
-                            print "call set", service,url,didl
+                            print "call set", service,service.device.get_friendly_name(),url,didl
                             action = service.get_action('SetAVTransportURI')
                             d = action.call(InstanceID=0,CurrentURI=url,
                                                          CurrentURIMetaData=didl)
@@ -348,7 +348,7 @@ class TreeWidget(object):
                             return d
 
                         def play(service,url,didl):
-                            print "call stop", service
+                            print "call stop", service, service.device.get_friendly_name()
                             action = service.get_action('Stop')
                             print action
                             d = action.call(InstanceID=0)
@@ -366,10 +366,11 @@ class TreeWidget(object):
                         menu.append(gtk.SeparatorMenuItem())
                         for device in self.coherence.devices:
                             if device.get_device_type().split(':')[3].lower() == 'mediarenderer':
-                                item = gtk.MenuItem(device.get_friendly_name())
                                 service = device.get_service_by_type('AVTransport')
-                                item.connect("activate", lambda x: play(service,url,didl))
-                                menu.append(item)
+                                if service != None:
+                                    item = gtk.MenuItem(device.get_friendly_name())
+                                    item.connect("activate", lambda x,s,u,d: play(s,u,d),service,url,didl)
+                                    menu.append(item)
 
                 if menu != None:
                     menu.show_all()

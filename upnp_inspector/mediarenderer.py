@@ -157,13 +157,14 @@ class MediaRendererWidget(log.Loggable):
         service.subscribe_for_variable('Mute', callback=self.state_variable_change)
 
         service = self.device.get_service_by_type('AVTransport')
-        service.subscribe_for_variable('AVTransportURI', callback=self.state_variable_change)
-        service.subscribe_for_variable('CurrentTrackMetaData', callback=self.state_variable_change)
-        service.subscribe_for_variable('TransportState', callback=self.state_variable_change)
-        service.subscribe_for_variable('CurrentTransportActions', callback=self.state_variable_change)
+        if service != None:
+            service.subscribe_for_variable('AVTransportURI', callback=self.state_variable_change)
+            service.subscribe_for_variable('CurrentTrackMetaData', callback=self.state_variable_change)
+            service.subscribe_for_variable('TransportState', callback=self.state_variable_change)
+            service.subscribe_for_variable('CurrentTransportActions', callback=self.state_variable_change)
 
-        service.subscribe_for_variable('AbsTime', callback=self.state_variable_change)
-        service.subscribe_for_variable('TrackDuration', callback=self.state_variable_change)
+            service.subscribe_for_variable('AbsTime', callback=self.state_variable_change)
+            service.subscribe_for_variable('TrackDuration', callback=self.state_variable_change)
 
         self.get_position()
 
@@ -187,23 +188,27 @@ class MediaRendererWidget(log.Loggable):
             elt = DIDLLite.DIDLElement.fromString(metadata)
             if elt.numItems() == 1:
                 service = self.device.get_service_by_type('ConnectionManager')
-                local_protocol_infos=service.get_state_variable('SinkProtocolInfo').value.split(',')
-                #print local_protocol_infos
-                item = elt.getItems()[0]
-                try:
-                    res = item.res.get_matching(local_protocol_infos, protocol_type='internal')
-                    if len(res) == 0:
-                        res = item.res.get_matching(local_protocol_infos)
-                    if len(res) > 0:
-                        res = res[0]
-                        remote_protocol,remote_network,remote_content_format,_ = res.protocolInfo.split(':')
-                        d = self.stop()
-                        d.addCallback(lambda x: self.set_uri(res.data,metadata))
-                        d.addCallback(lambda x: self.play_or_pause(force_play=True))
-                        d.addErrback(self.handle_error)
-                        d.addErrback(self.handle_error)
-                except AttributeError:
-                    print "Sorry, we currently support only single items!"
+                if service != None:
+                    local_protocol_infos=service.get_state_variable('SinkProtocolInfo').value.split(',')
+                    #print local_protocol_infos
+                    item = elt.getItems()[0]
+                    try:
+                        res = item.res.get_matching(local_protocol_infos, protocol_type='internal')
+                        if len(res) == 0:
+                            res = item.res.get_matching(local_protocol_infos)
+                        if len(res) > 0:
+                            res = res[0]
+                            remote_protocol,remote_network,remote_content_format,_ = res.protocolInfo.split(':')
+                            d = self.stop()
+                            d.addCallback(lambda x: self.set_uri(res.data,metadata))
+                            d.addCallback(lambda x: self.play_or_pause(force_play=True))
+                            d.addErrback(self.handle_error)
+                            d.addErrback(self.handle_error)
+                    except AttributeError:
+                        print "Sorry, we currently support only single items!"
+                else:
+                    print "can't check for the best resource!"
+
 
 
     def make_button(self,icon,callback=None,sensitive=True):

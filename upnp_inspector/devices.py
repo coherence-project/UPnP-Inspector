@@ -302,6 +302,12 @@ class DevicesWidget(log.Loggable):
                         item = gtk.MenuItem("control MediaRendererer")
                         item.connect("activate", self.mediarenderer_control, object)
                         menu.append(item)
+                    if(object != None and
+                       object.get_device_type().split(':')[3].lower() == 'internetgatewaydevice'):
+                        menu.append(gtk.SeparatorMenuItem())
+                        item = gtk.MenuItem("control InternetGatewayDevice")
+                        item.connect("activate", self.igd_control, object)
+                        menu.append(item)
                     menu.show_all()
                     menu.popup(None,None,None,event.button,event.time)
                     return True
@@ -355,7 +361,14 @@ class DevicesWidget(log.Loggable):
             if isinstance(method,tuple):
                 kwargs[entry] = unicode(method[1]()[method[0]()][0])
             else:
-                kwargs[entry] = unicode(method())
+                value = method()
+                if type(value) == bool:
+                    if value == True:
+                        kwargs[entry] = '1'
+                    else:
+                        kwargs[entry] = '0'
+                else:
+                    kwargs[entry] = unicode(value)
 
         def populate(result, entries):
             self.info("result %r" % result)
@@ -438,4 +451,13 @@ class DevicesWidget(log.Loggable):
             self.windows[id].show()
         except:
             ui = MediaRendererWidget(self.coherence,device)
+            self.windows[id] = ui.window
+
+    def igd_control(self,widget,device):
+        from igd import IGDWidget
+        id = '@'.join((device.get_usn(),'IGDControl'))
+        try:
+            self.windows[id].show()
+        except:
+            ui = IGDWidget(self.coherence,device)
             self.windows[id] = ui.window

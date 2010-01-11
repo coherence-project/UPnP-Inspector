@@ -55,6 +55,6 @@ This 0.2.2 - Let the Sunshine In - release includes
         'upnp_inspector': ['icons/*.png'],
     },
     install_requires=[
-    'Coherence >= 0.6.4',
+    'Coherence >= 0.6.7',
     ]
 )

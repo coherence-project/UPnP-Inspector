@@ -129,7 +129,7 @@ class IGDWidget(log.Loggable):
         if self.wan_device != None:
             try:
                 self.wan_connection_device = self.wan_device.get_embedded_device_by_type('WANConnectionDevice')[0]
-                service = self.wan_connection_device.get_service_by_type('WANIPConnection')
+                service = self.wan_connection_device.get_service_by_type(['WANIPConnection','WANPPPConnection'])
                 service.subscribe_for_variable('PortMappingNumberOfEntries', callback=self.state_variable_change)
                 service.subscribe_for_variable('ExternalIPAddress', callback=self.state_variable_change)
                 self.get_state_loop = task.LoopingCall(self.get_state,service)
@@ -166,7 +166,7 @@ class IGDWidget(log.Loggable):
             return True
 
     def delete_mapping(self,widget,protocol,remote_host,external_port):
-        service = self.wan_connection_device.get_service_by_type('WANIPConnection')
+        service = self.wan_connection_device.get_service_by_type(['WANIPConnection','WANPPPConnection'])
         action = service.get_action('DeletePortMapping')
         if action != None:
             d = action.call(NewRemoteHost=remote_host,NewExternalPort=external_port,NewProtocol=protocol)

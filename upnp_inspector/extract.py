@@ -118,7 +118,8 @@ class Extract(object):
         self.window.show_all()
 
     def _toggle_tar(self,w):
-        self.email_button.set_sensitive(w.get_active())
+        if haz_smtp:
+            self.email_button.set_sensitive(w.get_active())
 
     def hide(self,w,e):
         w.hide()

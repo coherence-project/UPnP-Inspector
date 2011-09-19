@@ -4,8 +4,8 @@
 Windows Build for the UPnP-Inspector
 ===========================================
 
-:Date: 2009-05-18
-:Author: lightyear
+:Date: 2011-09-19
+:Author: lightyear, htgoebel
 
 Setting up dependencies
 ===========================================
@@ -22,11 +22,22 @@ written the UPnP-Inspector (or mostly Coherence) did not work with
 Python 2.6 or 3k. If this did not change meanwhile, take care to
 always download Python in the version 2.5 (2.5.3 at the time beeing).
 
-SetupTools
+Following the links below you will find .msi and .exe-installers.
+Simply install them.
+
+* `Python 2.x`__ or higher (tested with 2.5 and 2.6, but other
+  versions should work, too. Python 3.x is currently *not* supported),
+* `setuptools`__ for installation (see below), and
+
+__ http://www.python.org/download/
+__ http://pypi.python.org/pypi/setuptools
+
+
+Setuptools
 ~~~~~~~~~~~~~~~~~~~
 
 Setuptools is as a strong dependency for coherence and the
-UPnP-Inspector as well as a runtime dependency for our developtment
+UPnP-Inspector as well as a runtime dependency for our development
 environment. In any case if you install the python you probably want
 to have the handy easy_install command anyway. Install setuptools like
 this if you didn't yet:
@@ -38,8 +49,15 @@ user yet).
 GTK-Runtime
 ~~~~~~~~~~~~~~~~~~~
 
-Download and install the GTK-Runtime. Don't you dare to throw away the
-downloaded installer! We need it later.
+Download and install the `GTK-Runtime`__. Don't you dare to throw away
+the downloaded installer! We need it later.
+
+__ http://sourceforge.net/projects/gtk-win/files/
+
+ * `libglade`__ needs to be unpacked into the same directory as the
+ GTK dlls.
+
+__ http://ftp.gnome.org/pub/gnome/binaries/win32/libglade/
 
 Python Bindinds for the runtime
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -47,9 +65,15 @@ Python Bindinds for the runtime
 We also need some Python-Bindings for the GTK-Runtime we just
 installed. In particular we need:
 
- * pygtk
- * pycairo
- * pygobject
+ * `pygtk`__
+ * `pycairo`__
+ * `pygobject`__
+ 
+__ http://ftp.gnome.org/pub/gnome/binaries/win32/pygtk/
+__ http://ftp.gnome.org/pub/gnome/binaries/win32/pycairo/
+__ http://ftp.gnome.org/pub/gnome/binaries/win32/pygobject/
+
+
 
 PyWin32
 ~~~~~~~~~~~~~~~~~~~
@@ -66,15 +90,18 @@ bbfreeze
 
 We use the cool bbfreeze project to create our binary of the
 Inspector. So we need that as well. It is very simple because we have
-easy_install:
+easy_install::
 
-  easy_install bbfreeze
+   easy_install bbfreeze
+
 
 internal dependencies
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Twisted
 -------------------------
+
+http://twistedmatrix.com/trac/wiki/Downloads
 
 If you have Visual-Studio 2003 you can try to install twisted 8.10.0
 with easy_install. I was not able to do that so I recommand to do what
@@ -84,13 +111,22 @@ it ;) .
 But do it! If you try to install Coherence or UPnP-Inspector before
 you did that you might fail.
 
+You'll also have to install some dependencies:
+* http://pypi.python.org/pypi/zope.interface
+* http://pypi.python.org/pypi/pyOpenSSL
+
+Again this is very simple because we have easy_install::
+
+   easy_install zope.interface pyOpenSSL
+
+
 Coherence
 -------------------------
 
 To be able to build the Inspector you need Coherence of course. You
-can simply install it with easy_install:
+can simply install it with easy_install::
 
-  easy_install.exe Coherence
+  easy_install Coherence
 
 This will install Coherence and all its python dependencies (dispite
 twisted as we already installed ;) )
@@ -113,7 +149,7 @@ building the binary
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 First we need to build the "exe" and corresponding dependencies. that
-is done by running:
+is done by running::
 
   python compile.py
 

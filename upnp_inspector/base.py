@@ -41,7 +41,8 @@ class Inspector(log.Loggable):
         window.connect("delete_event", lambda x, y: reactor.stop())
         window.set_default_size(350, 700)
         window.set_title('UPnP Inspector')
-        icon = resource_filename(__name__, os.path.join('icons', 'inspector-icon.png'))
+        icon = resource_filename(__name__,
+                                 os.path.join('icons', 'inspector-icon.png'))
         gtk.window_set_default_icon_from_file(icon)
 
         vbox = gtk.VBox(homogeneous=False, spacing=0)
@@ -62,10 +63,12 @@ class Inspector(log.Loggable):
         menu = gtk.Menu()
         self.show_details_item = gtk.CheckMenuItem("show details")
         menu.append(self.show_details_item)
-        self.show_details_item.connect("activate", self.show_details_widget, "view.details")
+        self.show_details_item.connect("activate", self.show_details_widget,
+                                       "view.details")
         self.show_events_item = gtk.CheckMenuItem("show events")
         menu.append(self.show_events_item)
-        self.show_events_item.connect("activate", self.show_events_widget, "view.events")
+        self.show_events_item.connect("activate", self.show_events_widget,
+                                      "view.events")
         self.show_log_item = gtk.CheckMenuItem("show global log")
         menu.append(self.show_log_item)
         self.show_log_item.connect("activate", self.show_log_widget, "view.log")
@@ -96,9 +99,11 @@ class Inspector(log.Loggable):
         window.show_all()
 
         self.events_widget = EventsWidget(self.coherence)
-        self.events_widget.window.connect('delete_event', self.hide_events_widget)
+        self.events_widget.window.connect('delete_event',
+                                          self.hide_events_widget)
         self.details_widget = DetailsWidget(self.coherence)
-        self.details_widget.window.connect('delete_event', self.hide_details_widget)
+        self.details_widget.window.connect('delete_event',
+                                           self.hide_details_widget)
         self.log_widget = LogWidget(self.coherence)
         self.log_widget.window.connect('delete_event', self.hide_log_widget)
 

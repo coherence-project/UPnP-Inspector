@@ -121,13 +121,17 @@ class TreeWidget(object):
         self.window = gtk.ScrolledWindow()
         self.window.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
 
-        icon = resource_filename(__name__, os.path.join('icons', 'folder.png'))
+        icon = resource_filename(__name__,
+                                 os.path.join('icons', 'folder.png'))
         self.folder_icon = gtk.gdk.pixbuf_new_from_file(icon)
-        icon = resource_filename(__name__, os.path.join('icons', 'audio-x-generic.png'))
+        icon = resource_filename(__name__,
+                                 os.path.join('icons', 'audio-x-generic.png'))
         self.audio_icon = gtk.gdk.pixbuf_new_from_file(icon)
-        icon = resource_filename(__name__, os.path.join('icons', 'video-x-generic.png'))
+        icon = resource_filename(__name__,
+                                 os.path.join('icons', 'video-x-generic.png'))
         self.video_icon = gtk.gdk.pixbuf_new_from_file(icon)
-        icon = resource_filename(__name__, os.path.join('icons', 'image-x-generic.png'))
+        icon = resource_filename(__name__,
+                                 os.path.join('icons', 'image-x-generic.png'))
         self.image_icon = gtk.gdk.pixbuf_new_from_file(icon)
 
         self.store = gtk.TreeStore(str,  # 0: name or title
@@ -144,9 +148,9 @@ class TreeWidget(object):
         self.treeview = gtk.TreeView(self.store)
         self.column = gtk.TreeViewColumn('Items')
         self.treeview.append_column(self.column)
-        self.treeview.enable_model_drag_source(gtk.gdk.BUTTON1_MASK,
-                                    [('upnp/metadata', 0, 1)],
-                                    gtk.gdk.ACTION_DEFAULT | gtk.gdk.ACTION_PRIVATE)
+        self.treeview.enable_model_drag_source(
+            gtk.gdk.BUTTON1_MASK, [('upnp/metadata', 0, 1)],
+            gtk.gdk.ACTION_DEFAULT | gtk.gdk.ACTION_PRIVATE)
         self.treeview.connect("drag_data_get", self.drag_data_get_cb)
 
         # create a CellRenderers to render the data
@@ -396,7 +400,8 @@ class TreeWidget(object):
                 update_id = changes.pop(0).strip()
 
                 def match_func(model, iter, data):
-                    column, key = data  # data is a tuple containing column number, key
+                    # data is a tuple containing column number, key
+                    column, key = data
                     value = model.get_value(iter, column)
                     return value == key
 
@@ -405,7 +410,8 @@ class TreeWidget(object):
                     while iter:
                         if func(model, iter, data):
                             return iter
-                        result = search(model, model.iter_children(iter), func, data)
+                        result = search(model, model.iter_children(iter),
+                                        func, data)
                         if result:
                             return result
                         iter = model.iter_next(iter)
@@ -417,7 +423,8 @@ class TreeWidget(object):
                     match_iter = search(self.store, self.store.iter_children(iter),
                                     match_func, (ID_COLUMN, container))
                     if match_iter:
-                        print "heureka, we have a change in ", container, ", container needs a reload"
+                        print "heureka, we have a change in ", container,
+                        print ", container needs a reload"
                         path = self.store.get_path(match_iter)
                         expanded = self.treeview.row_expanded(path)
                         child = self.store.iter_children(match_iter)
@@ -425,7 +432,8 @@ class TreeWidget(object):
                             self.store.remove(child)
                             child = self.store.iter_children(match_iter)
                         self.browse(self.treeview, path, None,
-                                    starting_index=0, requested_count=0, force=True, expand=expanded)
+                                    starting_index=0, requested_count=0,
+                                    force=True, expand=expanded)
 
                     break
                     row_count += 1
@@ -445,16 +453,19 @@ class TreeWidget(object):
             self.store.set_value(item, DIDL_COLUMN, response['Result'])
             self.store.set_value(item, SERVICE_COLUMN, service)
             self.store.set_value(item, TOOLTIP_ICON_COLUMN, None)
-            self.store.append(item, ('...loading...', '', 'placeholder', -1, '', '', None, '', None))
+            self.store.append(item, ('...loading...', '', 'placeholder',
+                                     -1, '', '', None, '', None))
 
         action = service.get_action('Browse')
         d = action.call(ObjectID='0', BrowseFlag='BrowseMetadata',
-                                         StartingIndex=str(0), RequestedCount=str(0),
-                                         Filter='*', SortCriteria='')
+                        StartingIndex=str(0), RequestedCount=str(0),
+                        Filter='*', SortCriteria='')
         d.addCallback(reply)
         d.addErrback(self.handle_error)
-        service.subscribe_for_variable('ContainerUpdateIDs', callback=self.state_variable_change)
-        service.subscribe_for_variable('SystemUpdateID', callback=self.state_variable_change)
+        service.subscribe_for_variable('ContainerUpdateIDs',
+                                       callback=self.state_variable_change)
+        service.subscribe_for_variable('SystemUpdateID',
+                                       callback=self.state_variable_change)
 
     def row_expanded(self, view, iter, row_path):
         #print "row_expanded", view,iter,row_path
@@ -464,8 +475,10 @@ class TreeWidget(object):
             if upnp_class == 'placeholder':
                 self.browse(view, row_path, None)
 
-    def browse(self, view, row_path, column, starting_index=0, requested_count=0, force=False, expand=False):
-        #print "browse", view,row_path,column,starting_index,requested_count,force
+    def browse(self, view, row_path, column, starting_index=0,
+               requested_count=0, force=False, expand=False):
+        #print "browse", view,row_path,column,starting_index,
+        #print requested_count,force
         iter = self.store.get_iter(row_path)
         child = self.store.iter_children(iter)
         if child:
@@ -503,7 +516,8 @@ class TreeWidget(object):
             title, = self.store.get(iter, NAME_COLUMN)
             try:
                 title = title[:title.rindex('(')]
-                self.store.set_value(iter, NAME_COLUMN, "%s(%d)" % (title, int(r['TotalMatches'])))
+                self.store.set_value(iter, NAME_COLUMN,
+                                     "%s(%d)" % (title, int(r['TotalMatches'])))
             except ValueError:
                 pass
             elt = parse_xml(r['Result'], 'utf-8')
@@ -536,14 +550,17 @@ class TreeWidget(object):
                     elif item.upnp_class.startswith('object.item.imageItem'):
                         icon = self.image_icon
 
-                    res = item.res.get_matching(['*:*:*:*'], protocol_type='http-get')
+                    res = item.res.get_matching(['*:*:*:*'],
+                                                protocol_type='http-get')
                     if len(res) > 0:
                         res = res[0]
                         service = res.data
 
                 new_iter = self.store.append(iter, (title, item.id, item.upnp_class, child_count, '', service, icon, stored_didl_string, None))
                 if item.upnp_class.startswith('object.container'):
-                    self.store.append(new_iter, ('...loading...', '', 'placeholder', -1, '', '', None, '', None))
+                    self.store.append(new_iter, ('...loading...', '',
+                                                 'placeholder', -1, '', '',
+                                                 None, '', None))
 
 
             if((int(r['TotalMatches']) > 0 and force == False) or
@@ -597,7 +614,7 @@ class MediaServerWidget(log.Loggable):
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         self.window.connect("delete_event", self.hide)
         self.window.set_default_size(400, 600)
-        self.window.set_title('Browse MediaServer %s' % device.get_friendly_name())
+        self.window.set_title('Browse MediaServer ' + device.get_friendly_name())
         self.item_details = ItemDetailsWidget()
         self.ui = TreeWidget(coherence, device, self.item_details.store)
         vpane = gtk.VPaned()

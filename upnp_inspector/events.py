@@ -60,7 +60,8 @@ class EventsWidget(log.Loggable):
 
         self.treeview.connect("button_press_event", self.button_action)
 
-        self.coherence.connect(self.append, 'Coherence.UPnP.DeviceClient.Service.Event.processed')
+        self.coherence.connect(self.append,
+                               'Coherence.UPnP.DeviceClient.Service.Event.processed')
 
     def append(self, service, event):
         if len(self.store) >= 500:
@@ -68,7 +69,8 @@ class EventsWidget(log.Loggable):
 
         timestamp = time.strftime("%H:%M:%S")
         _, _, _, service_class, version = service.service_type.split(':')
-        self.store.insert(0, (timestamp, service.device.friendly_name, service_class, event[0], event[1], event[2]))
+        self.store.insert(0, (timestamp, service.device.friendly_name,
+                              service_class, event[0], event[1], event[2]))
 
     def button_action(self, widget, event):
         x = int(event.x)

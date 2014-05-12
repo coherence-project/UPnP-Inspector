@@ -110,7 +110,9 @@ class DevicesWidget(log.Loggable):
         if iter:
             type, object = self.store.get(iter, TYPE_COLUMN, OBJECT_COLUMN)
             if type == ACTION:
-                id = '@'.join((object.service.device.get_usn(), object.service.service_type, object.name))
+                id = '@'.join((object.service.device.get_usn(),
+                               object.service.service_type,
+                               object.name))
                 try:
                     self.windows[id].show()
                 except:
@@ -153,10 +155,12 @@ class DevicesWidget(log.Loggable):
                             arguments = object.get_in_arguments()
                         else:
                             arguments = object.get_out_arguments()
-                        table = gtk.Table(rows=len(arguments), columns=2, homogeneous=False)
+                        table = gtk.Table(rows=len(arguments), columns=2,
+                                          homogeneous=False)
                         entries = {}
                         for argument in arguments:
-                            variable = action.service.get_state_variable(argument.state_variable)
+                            variable = action.service.get_state_variable(
+                                argument.state_variable)
                             name = gtk.Label(argument.name + ':')
                             name.set_alignment(0, 0)
                             #hbox = gtk.HBox(homogeneous=False, spacing=2)
@@ -216,9 +220,15 @@ class DevicesWidget(log.Loggable):
                         return vbox, entries
 
                     vbox = gtk.VBox(homogeneous=False, spacing=10)
-                    vbox.pack_start(build_label(self.store[row_path[0]][ICON_COLUMN], self.store[row_path[0]][NAME_COLUMN]), False, False, 2)
-                    vbox.pack_start(build_label(self.service_icon, self.store[row_path[0], row_path[1]][NAME_COLUMN]), False, False, 2)
-                    vbox.pack_start(build_label(self.action_icon, object.name), False, False, 2)
+                    vbox.pack_start(build_label(self.store[row_path[0]][ICON_COLUMN],
+                                                self.store[row_path[0]][NAME_COLUMN]),
+                                    False, False, 2)
+                    vbox.pack_start(build_label(self.service_icon,
+                                                self.store[row_path[0],
+                                                           row_path[1]][NAME_COLUMN]),
+                                    False, False, 2)
+                    vbox.pack_start(build_label(self.action_icon, object.name),
+                                    False, False, 2)
                     hbox = gtk.HBox(homogeneous=False, spacing=10)
                     hbox.pack_start(vbox, False, False, 2)
                     button = build_button('Invoke')
@@ -239,7 +249,8 @@ class DevicesWidget(log.Loggable):
                     context_id = status_bar.get_context_id("Action Statusbar")
                     vbox.pack_end(status_bar, False, False, 2)
 
-                    button.connect('clicked', self.call_action, object, in_entries, out_entries, status_bar)
+                    button.connect('clicked', self.call_action, object,
+                                   in_entries, out_entries, status_bar)
 
                     window.show_all()
                     self.windows[id] = window
@@ -315,8 +326,8 @@ class DevicesWidget(log.Loggable):
                     menu.popup(None, None, None, event.button, event.time)
                     return True
                 return False
-        if(event.button == 1 and
-           self.cb_item_left_click != None):
+        elif (event.button == 1 and
+            self.cb_item_left_click != None):
             reactor.callLater(0.1, self.cb_item_left_click, widget, event)
             return False
         return 0
@@ -336,8 +347,10 @@ class DevicesWidget(log.Loggable):
         return False
 
     def init_controlpoint(self):
-        self.coherence.connect(self.device_found, 'Coherence.UPnP.RootDevice.detection_completed')
-        self.coherence.connect(self.device_removed, 'Coherence.UPnP.RootDevice.removed')
+        self.coherence.connect(self.device_found,
+                               'Coherence.UPnP.RootDevice.detection_completed')
+        self.coherence.connect(self.device_removed,
+                               'Coherence.UPnP.RootDevice.removed')
         for device in self.coherence.devices:
             self.device_found(device)
 
@@ -346,7 +359,8 @@ class DevicesWidget(log.Loggable):
         self.debug("out_entries %r" % out_entries)
         context_id = status_bar.get_context_id("Action Statusbar")
         status_bar.pop(context_id)
-        status_bar.push(context_id, "%s - calling %s" % (time.strftime("%H:%M:%S"), action.name))
+        status_bar.push(context_id,
+                        time.strftime("%H:%M:%S") + " - calling " + action.name)
 
         kwargs = {}
         for entry, method in in_entries.items():
@@ -366,7 +380,8 @@ class DevicesWidget(log.Loggable):
             self.info("result %r" % result)
             self.info("entries %r" % entries)
             status_bar.pop(context_id)
-            status_bar.push(context_id, "%s - ok" % time.strftime("%H:%M:%S"))
+            status_bar.push(context_id,
+                            time.strftime("%H:%M:%S") + " - ok")
             for argument, value in result.items():
                 type, method = entries[argument]
                 if type == 'boolean':
@@ -379,7 +394,9 @@ class DevicesWidget(log.Loggable):
         def fail(f):
             self.debug(f)
             status_bar.pop(context_id)
-            status_bar.push(context_id, "%s - fail %s" % (time.strftime("%H:%M:%S"), str(f.value)))
+            status_bar.push(context_id,
+                            time.strftime("%H:%M:%S") + " - fail %s" % f.value)
+
 
         self.info("action %s call %r" % (action.name, kwargs))
         d = action.call(**kwargs)
@@ -387,24 +404,46 @@ class DevicesWidget(log.Loggable):
         d.addErrback(fail)
 
     def device_found(self, device=None, row=None):
-        self.info(device.get_friendly_name(), device.get_usn(), device.get_device_type().split(':')[3].lower(), device.get_device_type())
+        self.info(device.get_friendly_name(),
+                  device.get_usn(),
+                  device.get_device_type().split(':')[3].lower(),
+                  device.get_device_type())
         name = '%s (%s)' % (device.get_friendly_name(), ':'.join(device.get_device_type().split(':')[3:5]))
         item = self.store.append(row, (DEVICE, name, device.get_usn(),
-                                        self.icons.get(device.get_device_type().split(':')[3].lower(), self.icons['device']),
-                                        device))
+                                       self.icons.get(device.get_device_type().split(':')[3].lower(), self.icons['device']),
+                                       device))
         for service in device.services:
             _, _, _, service_class, version = service.service_type.split(':')
             service.subscribe()
-            service_item = self.store.append(item, (SERVICE, ':'.join((service_class, version)), service.service_type, self.service_icon, service))
-            variables_item = self.store.append(service_item, (-1, 'State Variables', '', self.folder_icon, None))
+            service_item = self.store.append(
+                item,
+                (SERVICE,
+                 ':'.join((service_class, version)),
+                 service.service_type, self.service_icon, service))
+            variables_item = self.store.append(
+                service_item, (-1, 'State Variables', '',
+                               self.folder_icon, None))
             for variable in service.get_state_variables(0).values():
-                self.store.append(variables_item, (VARIABLE, variable.name, '', self.state_variable_icon, variable))
+                self.store.append(
+                    variables_item,
+                    (VARIABLE, variable.name, '',
+                     self.state_variable_icon, variable))
+
             for action in service.get_actions().values():
-                action_item = self.store.append(service_item, (ACTION, action.name, '', self.action_icon, action))
+                action_item = self.store.append(
+                    service_item,
+                    (ACTION, action.name, '',
+                     self.action_icon, action))
                 for argument in action.get_in_arguments():
-                    self.store.append(action_item, (ARGUMENT, argument.name, '', self.action_arg_in_icon, argument))
+                    self.store.append(
+                        action_item,
+                        (ARGUMENT, argument.name, '',
+                         self.action_arg_in_icon, argument))
                 for argument in action.get_out_arguments():
-                    self.store.append(action_item, (ARGUMENT, argument.name, '', self.action_arg_out_icon, argument))
+                    self.store.append(
+                        action_item, (
+                        ARGUMENT, argument.name, '',
+                        self.action_arg_out_icon, argument))
 
         for embedded_device in device.devices:
             self.device_found(embedded_device, row=item)

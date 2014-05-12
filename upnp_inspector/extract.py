@@ -29,7 +29,8 @@ try:
         """ build an email message and send it to our googlemail account
         """
 
-        def __init__(self, mail_from, mail_to, mail_subject, mail_file, *args, **kwargs):
+        def __init__(self, mail_from, mail_to, mail_subject, mail_file,
+                     *args, **kwargs):
             smtp.ESMTPClient.__init__(self, *args, **kwargs)
             self.mailFrom = mail_from
             self.mailTo = mail_to
@@ -56,7 +57,8 @@ try:
             fp = open(self.mail_file, 'rb')
             tar = MIMEApplication(fp.read(), 'x-tar')
             fp.close()
-            tar.add_header('Content-Disposition', 'attachment', filename=os.path.basename(self.mail_file))
+            tar.add_header('Content-Disposition', 'attachment',
+                           filename=os.path.basename(self.mail_file))
             msg.attach(tar)
             return StringIO.StringIO(msg.as_string())
 
@@ -67,7 +69,8 @@ try:
     class SMTPClientFactory(protocol.ClientFactory):
         protocol = SMTPClient
 
-        def __init__(self, mail_from, mail_to, mail_subject, mail_file, *args, **kwargs):
+        def __init__(self, mail_from, mail_to, mail_subject, mail_file,
+                     *args, **kwargs):
             self.mail_from = mail_from
             self.mail_to = mail_to
             self.mail_subject = mail_subject
@@ -96,14 +99,16 @@ class Extract(object):
         self.window = gtk.Dialog(title="Extracting XMl descriptions",
                             parent=None, flags=0, buttons=None)
         self.window.connect("delete_event", self.hide)
-        label = gtk.Label("Extracting XMl device and service descriptions\nfrom %s @ %s" % (device.friendly_name, device.host))
+        label = gtk.Label("Extracting XMl device and service descriptions\n"
+                          "from %s @ %s" % (device.friendly_name, device.host))
         self.window.vbox.pack_start(label, True, True, 10)
         tar_button = gtk.CheckButton("tar.gz them")
         tar_button.connect("toggled", self._toggle_tar)
         self.window.vbox.pack_start(tar_button, True, True, 5)
 
         if haz_smtp == True:
-            self.email_button = gtk.CheckButton("email them to Coherence HQ (%s)" % EMAIL_RECIPIENT)
+            self.email_button = gtk.CheckButton("email them to Coherence HQ "
+                                                "(%s)" % EMAIL_RECIPIENT)
             self.email_button.set_sensitive(False)
             self.window.vbox.pack_start(self.email_button, True, True, 5)
 
@@ -117,7 +122,8 @@ class Extract(object):
         button.connect("clicked", lambda w: self.window.destroy())
         button = gtk.Button(stock=gtk.STOCK_OK)
         self.window.action_area.pack_start(button, True, True, 5)
-        button.connect("clicked", lambda w: self.extract(w, tar_button.get_active()))
+        button.connect("clicked",
+                       lambda w: self.extract(w, tar_button.get_active()))
         self.window.show_all()
 
     def _toggle_tar(self, w):
@@ -146,7 +152,8 @@ class Extract(object):
                 l.append(d)
 
                 for service in workdevice.services:
-                    target = tmp_dir.child('%s-description.xml' % service.service_type.split(':', 3)[3])
+                    target = tmp_dir.child('%s-description.xml' %
+                                           service.service_type.split(':', 3)[3])
                     print "s", target, target.path
                     d = downloadPage(service.get_scpd_url(), target.path)
                     l.append(d)
@@ -156,11 +163,13 @@ class Extract(object):
 
             def finished(result):
                 uuid = self.device.get_uuid()
-                print "extraction of device %s finished" % uuid
-                print "files have been saved to %s" % os.path.join(tempfile.gettempdir(), uuid)
+                print "extraction of device", uuid, "finished"
+                print "files have been saved to",
+                print os.path.join(tempfile.gettempdir(), uuid)
                 if make_tar == True:
                     tgz_file = self.create_tgz(path.child(uuid))
-                    if haz_smtp == True and self.email_button.get_active() == True:
+                    if (haz_smtp == True and
+                        self.email_button.get_active() == True):
                         self.send_email(tgz_file)
                     path.child(uuid).remove()
                 self.progressbar.set_fraction(0.0)
@@ -171,7 +180,8 @@ class Extract(object):
             dl = defer.DeferredList(l)
             dl.addCallback(finished)
         except Exception, msg:
-            print "problem creating download directory: %r (%s)" % (Exception, msg)
+            print "problem creating download directory:",
+            print repr(Exception), "(%s)" % msg
             self.progressbar.set_fraction(0.0)
 
     def create_tgz(self, path):
@@ -191,14 +201,17 @@ class Extract(object):
 
         def got_mx(result):
             mx_list = result[0]
-            mx_list.sort(lambda x, y: cmp(x.payload.preference, y.payload.preference))
+            mx_list.sort(lambda x, y: cmp(x.payload.preference,
+                                          y.payload.preference))
             if len(mx_list) > 0:
                 import posix
                 import pwd
                 import socket
                 from twisted.internet import reactor
                 reactor.connectTCP(str(mx_list[0].payload.name), 25,
-                    SMTPClientFactory('@'.join((pwd.getpwuid(posix.getuid())[0], socket.gethostname())), EMAIL_RECIPIENT, 'xml-files', file))
+                    SMTPClientFactory('@'.join((pwd.getpwuid(posix.getuid())[0],
+                                                socket.gethostname())),
+                                      EMAIL_RECIPIENT, 'xml-files', file))
 
         mx = namesclient.lookupMailExchange('googlemail.com')
         mx.addCallback(got_mx)

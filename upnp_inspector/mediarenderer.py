@@ -38,7 +38,9 @@ class MediaRendererWidget(log.Loggable):
             title = 'MediaRenderer'
         self.window.set_title(title)
 
-        self.window.drag_dest_set(gtk.DEST_DEFAULT_DROP, [('upnp/metadata', 0, 1)], gtk.gdk.ACTION_DEFAULT | gtk.gdk.ACTION_PRIVATE)
+        self.window.drag_dest_set(
+            gtk.DEST_DEFAULT_DROP, [('upnp/metadata', 0, 1)],
+            gtk.gdk.ACTION_DEFAULT | gtk.gdk.ACTION_PRIVATE)
         self.window.connect('drag_motion', self.motion_cb)
         self.window.connect('drag_drop', self.drop_cb)
         self.window.connect("drag_data_received", self.received_cb)
@@ -48,7 +50,8 @@ class MediaRendererWidget(log.Loggable):
         hbox = gtk.HBox(homogeneous=False, spacing=10)
         hbox.set_border_width(2)
         self.album_art_image = gtk.Image()
-        icon = resource_filename(__name__, os.path.join('icons', 'blankalbum.png'))
+        icon = resource_filename(__name__,
+                                 os.path.join('icons', 'blankalbum.png'))
         self.blank_icon = gtk.gdk.pixbuf_new_from_file(icon)
         self.album_art_image.set_from_pixbuf(self.blank_icon)
         hbox.pack_start(self.album_art_image, False, False, 2)
@@ -73,7 +76,8 @@ class MediaRendererWidget(log.Loggable):
         self.position_min_text = gtk.Label("0:00")
         self.position_min_text.set_use_markup(True)
         seekbox.pack_start(self.position_min_text, False, False, 2)
-        adjustment = gtk.Adjustment(value=0, lower=0, upper=240, step_incr=1, page_incr=20)  # , page_size=20)
+        adjustment = gtk.Adjustment(value=0, lower=0, upper=240,
+                                    step_incr=1, page_incr=20)  #, page_size=20)
         self.position_scale = gtk.HScale(adjustment=adjustment)
         self.position_scale.set_draw_value(True)
         self.position_scale.set_value_pos(gtk.POS_BOTTOM)
@@ -87,22 +91,32 @@ class MediaRendererWidget(log.Loggable):
         vbox.pack_start(seekbox, False, False, 2)
 
         buttonbox = gtk.HBox(homogeneous=False, spacing=10)
-        self.prev_button = self.make_button('media-skip-backward.png', self.skip_backward, sensitive=False)
+        self.prev_button = self.make_button('media-skip-backward.png',
+                                            self.skip_backward, sensitive=False)
         buttonbox.pack_start(self.prev_button, False, False, 2)
-        self.seek_backward_button = self.make_button('media-seek-backward.png', callback=self.seek_backward, sensitive=False)
+        self.seek_backward_button = self.make_button(
+            'media-seek-backward.png',
+            callback=self.seek_backward, sensitive=False)
         buttonbox.pack_start(self.seek_backward_button, False, False, 2)
-        self.stop_button = self.make_button('media-playback-stop.png', callback=self.stop, sensitive=False)
+        self.stop_button = self.make_button(
+            'media-playback-stop.png', callback=self.stop, sensitive=False)
         buttonbox.pack_start(self.stop_button, False, False, 2)
-        self.start_button = self.make_button('media-playback-start.png', callback=self.play_or_pause, sensitive=False)
+        self.start_button = self.make_button(
+            'media-playback-start.png',
+            callback=self.play_or_pause, sensitive=False)
         buttonbox.pack_start(self.start_button, False, False, 2)
-        self.seek_forward_button = self.make_button('media-seek-forward.png', callback=self.seek_forward, sensitive=False)
+        self.seek_forward_button = self.make_button(
+            'media-seek-forward.png',
+            callback=self.seek_forward, sensitive=False)
         buttonbox.pack_start(self.seek_forward_button, False, False, 2)
-        self.next_button = self.make_button('media-skip-forward.png', self.skip_forward, sensitive=False)
+        self.next_button = self.make_button(
+            'media-skip-forward.png', self.skip_forward, sensitive=False)
         buttonbox.pack_start(self.next_button, False, False, 2)
 
         hbox = gtk.HBox(homogeneous=False, spacing=10)
         #hbox.set_size_request(240,-1)
-        adjustment = gtk.Adjustment(value=0, lower=0, upper=100, step_incr=1, page_incr=20)  # , page_size=20)
+        adjustment = gtk.Adjustment(value=0, lower=0, upper=100,
+                                    step_incr=1, page_incr=20)  #, page_size=20)
         self.volume_scale = gtk.HScale(adjustment=adjustment)
         self.volume_scale.set_size_request(140, -1)
         self.volume_scale.set_draw_value(False)
@@ -110,17 +124,21 @@ class MediaRendererWidget(log.Loggable):
         hbox.pack_start(self.volume_scale, False, False, 2)
         button = gtk.Button()
         self.volume_image = gtk.Image()
-        icon = resource_filename(__name__, os.path.join('icons', 'audio-volume-low.png'))
+        icon = resource_filename(__name__,
+                                 os.path.join('icons', 'audio-volume-low.png'))
         self.volume_low_icon = gtk.gdk.pixbuf_new_from_file(icon)
         self.volume_image.set_from_pixbuf(self.volume_low_icon)
         button.set_image(self.volume_image)
         button.connect("clicked", self.mute)
 
-        icon = resource_filename(__name__, os.path.join('icons', 'audio-volume-medium.png'))
+        icon = resource_filename(__name__,
+                                 os.path.join('icons', 'audio-volume-medium.png'))
         self.volume_medium_icon = gtk.gdk.pixbuf_new_from_file(icon)
-        icon = resource_filename(__name__, os.path.join('icons', 'audio-volume-high.png'))
+        icon = resource_filename(__name__,
+                                 os.path.join('icons', 'audio-volume-high.png'))
         self.volume_high_icon = gtk.gdk.pixbuf_new_from_file(icon)
-        icon = resource_filename(__name__, os.path.join('icons', 'audio-volume-muted.png'))
+        icon = resource_filename(__name__,
+                                 os.path.join('icons', 'audio-volume-muted.png'))
         self.volume_muted_icon = gtk.gdk.pixbuf_new_from_file(icon)
         hbox.pack_end(button, False, False, 2)
 
@@ -128,7 +146,8 @@ class MediaRendererWidget(log.Loggable):
         vbox.pack_start(buttonbox, False, False, 2)
 
         self.pause_button_image = gtk.Image()
-        icon = resource_filename(__name__, os.path.join('icons', 'media-playback-pause.png'))
+        icon = resource_filename(__name__,
+                                 os.path.join('icons', 'media-playback-pause.png'))
         icon = gtk.gdk.pixbuf_new_from_file(icon)
         self.pause_button_image.set_from_pixbuf(icon)
         self.start_button_image = self.start_button.get_image()
@@ -153,18 +172,26 @@ class MediaRendererWidget(log.Loggable):
         #        self.volume_scale.set_value(volume)
         #except:
         #    pass
-        service.subscribe_for_variable('Volume', callback=self.state_variable_change)
-        service.subscribe_for_variable('Mute', callback=self.state_variable_change)
+        service.subscribe_for_variable('Volume',
+                                       callback=self.state_variable_change)
+        service.subscribe_for_variable('Mute',
+                                       callback=self.state_variable_change)
 
         service = self.device.get_service_by_type('AVTransport')
         if service != None:
-            service.subscribe_for_variable('AVTransportURI', callback=self.state_variable_change)
-            service.subscribe_for_variable('CurrentTrackMetaData', callback=self.state_variable_change)
-            service.subscribe_for_variable('TransportState', callback=self.state_variable_change)
-            service.subscribe_for_variable('CurrentTransportActions', callback=self.state_variable_change)
+            service.subscribe_for_variable('AVTransportURI',
+                                           callback=self.state_variable_change)
+            service.subscribe_for_variable('CurrentTrackMetaData',
+                                           callback=self.state_variable_change)
+            service.subscribe_for_variable('TransportState',
+                                           callback=self.state_variable_change)
+            service.subscribe_for_variable('CurrentTransportActions',
+                                           callback=self.state_variable_change)
 
-            service.subscribe_for_variable('AbsTime', callback=self.state_variable_change)
-            service.subscribe_for_variable('TrackDuration', callback=self.state_variable_change)
+            service.subscribe_for_variable('AbsTime',
+                                           callback=self.state_variable_change)
+            service.subscribe_for_variable('TrackDuration',
+                                           callback=self.state_variable_change)
 
         self.get_position()
 
@@ -189,11 +216,13 @@ class MediaRendererWidget(log.Loggable):
             if elt.numItems() == 1:
                 service = self.device.get_service_by_type('ConnectionManager')
                 if service != None:
-                    local_protocol_infos = service.get_state_variable('SinkProtocolInfo').value.split(',')
+                    local_protocol_infos = service.get_state_variable(
+                        'SinkProtocolInfo').value.split(',')
                     #print local_protocol_infos
                     item = elt.getItems()[0]
                     try:
-                        res = item.res.get_matching(local_protocol_infos, protocol_type='internal')
+                        res = item.res.get_matching(local_protocol_infos,
+                                                    protocol_type='internal')
                         if len(res) == 0:
                             res = item.res.get_matching(local_protocol_infos)
                         if len(res) > 0:
@@ -232,14 +261,17 @@ class MediaRendererWidget(log.Loggable):
                     from coherence.upnp.core import DIDLLite
                     elt = DIDLLite.DIDLElement.fromString(variable.value)
                     for item in elt.getItems():
-                        print "now playing: %r - %r (%s/%r)" % (item.artist, item.title, item.id, item.upnp_class)
+                        print "now playing:", repr(item.artist),
+                        print "-", repr(item.title),
+                        print "(%s/%r)" % (item.id, item.upnp_class)
                         self.title_text.set_markup("<b>%s</b>" % item.title)
                         if item.album != None:
                             self.album_text.set_markup(item.album)
                         else:
                             self.album_text.set_markup('')
                         if item.artist != None:
-                            self.artist_text.set_markup("<i>%s</i>" % item.artist)
+                            self.artist_text.set_markup("<i>%s</i>" %
+                                                        item.artist)
                         else:
                             self.artist_text.set_markup("")
 
@@ -249,7 +281,8 @@ class MediaRendererWidget(log.Loggable):
                             icon_loader.write(icon)
                             icon_loader.close()
                             icon = icon_loader.get_pixbuf()
-                            icon = icon.scale_simple(128, 128, gtk.gdk.INTERP_BILINEAR)
+                            icon = icon.scale_simple(128, 128,
+                                                     gtk.gdk.INTERP_BILINEAR)
                             self.album_art_image.set_from_pixbuf(icon)
 
                         if item.upnp_class.startswith('object.item.audioItem') and item.albumArtURI != None:
@@ -277,7 +310,8 @@ class MediaRendererWidget(log.Loggable):
                 self.album_art_image.set_from_pixbuf(self.blank_icon)
 
         elif variable.name == 'TransportState':
-            print variable.name, 'changed from', variable.old_value, 'to', variable.value
+            print variable.name, 'changed from', variable.old_value,
+            print 'to', variable.value
             if variable.value == 'PLAYING':
                 service = self.device.get_service_by_type('AVTransport')
                 if 'Pause' in service.get_actions():
@@ -320,7 +354,8 @@ class MediaRendererWidget(log.Loggable):
                 print traceback.format_exc()
 
         elif variable.name == 'AVTransportURI':
-            print variable.name, 'changed from', variable.old_value, 'to', variable.value
+            print variable.name, 'changed from', variable.old_value,
+            print 'to', variable.value
             if variable.value != '':
                 pass
                 #self.seek_backward_button.set_sensitive(True)

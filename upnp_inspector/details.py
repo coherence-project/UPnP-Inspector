@@ -30,7 +30,8 @@ class DetailsWidget(log.Loggable):
         column.pack_start(text_cell, False)
         column.set_attributes(text_cell, text=0)
         column = gtk.TreeViewColumn('Value')
-        self.treeview.insert_column_with_data_func(-1, 'Value', gtk.CellRendererText(), self.celldatamethod)
+        self.treeview.insert_column_with_data_func(
+            -1, 'Value', gtk.CellRendererText(), self.celldatamethod)
         text_cell = gtk.CellRendererText()
         column.pack_start(text_cell, True)
         column.set_attributes(text_cell, text=1)
@@ -86,14 +87,17 @@ class DetailsWidget(log.Loggable):
             item = gtk.MenuItem("copy value")
             value, = self.store.get(iter, 1)
             if isinstance(value, tuple):
-                item.connect("activate", lambda w: self.clipboard.set_text(value[0]))
+                item.connect("activate",
+                             lambda w: self.clipboard.set_text(value[0]))
             else:
-                item.connect("activate", lambda w: self.clipboard.set_text(value))
+                item.connect("activate",
+                             lambda w: self.clipboard.set_text(value))
             menu.append(item)
             if isinstance(value, tuple):
                 menu.append(gtk.SeparatorMenuItem())
                 item = gtk.MenuItem("copy URL")
-                item.connect("activate", lambda w: self.clipboard.set_text(value[1]))
+                item.connect("activate",
+                             lambda w: self.clipboard.set_text(value[1]))
                 menu.append(item)
                 if(len(value) < 3 or
                    (value[2] == True or isinstance(value[2], dict))):

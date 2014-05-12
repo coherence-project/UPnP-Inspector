@@ -468,8 +468,7 @@ class MediaRendererWidget(log.Loggable):
         d.addErrback(self.handle_error)
         return d
 
-    def stop(self):
-        print "stop"
+    def __AVTransport_action(self, action):
         service = self.device.get_service_by_type('AVTransport')
         action = service.get_action('Stop')
         d = action.call(InstanceID=0)
@@ -477,21 +476,15 @@ class MediaRendererWidget(log.Loggable):
         d.addErrback(self.handle_error)
         return d
 
+    def stop(self):
+        print "stop"
+        return self.__AVTransport_action('Stop')
+
     def skip_backward(self):
-        service = self.device.get_service_by_type('AVTransport')
-        action = service.get_action('Previous')
-        d = action.call(InstanceID=0)
-        d.addCallback(self.handle_result)
-        d.addErrback(self.handle_error)
-        return d
+        return self.__AVTransport_action('Previous')
 
     def skip_forward(self):
-        service = self.device.get_service_by_type('AVTransport')
-        action = service.get_action('Next')
-        d = action.call(InstanceID=0)
-        d.addCallback(self.handle_result)
-        d.addErrback(self.handle_error)
-        return d
+        return self.__AVTransport_action('Next')
 
     def set_uri(self, url, didl):
         print "set_uri %s %r" % (url, didl)

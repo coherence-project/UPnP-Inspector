@@ -35,6 +35,9 @@ class Inspector(log.Loggable):
         self.coherence = Coherence(config)
         self.controlpoint = ControlPoint(self.coherence, auto_client=[])
         window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+        agr = gtk.AccelGroup()
+        window.add_accel_group(agr)
+
         window.connect("delete_event", lambda x, y: reactor.stop())
         window.set_default_size(350, 700)
         window.set_title('UPnP Inspector')
@@ -48,7 +51,10 @@ class Inspector(log.Loggable):
         refresh_item.connect("activate", self.refresh_devices)
         menu.append(refresh_item)
         menu.append(gtk.SeparatorMenuItem())
-        quit_item = gtk.MenuItem("Quit")
+
+        quit_item = gtk.ImageMenuItem(gtk.STOCK_QUIT, agr)
+        key, mod = gtk.accelerator_parse("<Control>Q")
+        quit_item.add_accelerator("activate", agr, key, mod, gtk.ACCEL_VISIBLE)
         menu.append(quit_item)
         quit_item.connect("activate", lambda x: reactor.stop())
 

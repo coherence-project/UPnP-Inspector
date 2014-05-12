@@ -17,13 +17,13 @@ setup(
     long_description=long_description,
     author="Frank Scholz",
     author_email='coherence@beebits.net',
-    license = "MIT",
+    license="MIT",
     packages=packages,
-    scripts = ['bin/upnp-inspector'],
-    url = "http://coherence.beebits.net/wiki/UPnP-Inspector",
-    download_url = 'http://coherence.beebits.net/download/UPnP-Inspector-%s.tar.gz' % __version__,
+    scripts=['bin/upnp-inspector'],
+    url="http://coherence.beebits.net/wiki/UPnP-Inspector",
+    download_url='http://coherence.beebits.net/download/UPnP-Inspector-%s.tar.gz' % __version__,
     keywords=['UPnP', 'DLNA'],
-    classifiers = ['Development Status :: 4 - Beta',
+    classifiers=['Development Status :: 4 - Beta',
                    'Environment :: X11 Applications :: Gnome',
                    'Environment :: X11 Applications :: GTK',
                    'License :: OSI Approved :: MIT License',
@@ -31,7 +31,7 @@ setup(
                    'Programming Language :: Python',
                 ],
 
-    package_data = {
+    package_data={
         'upnp_inspector': ['icons/*.png'],
     },
     install_requires=[

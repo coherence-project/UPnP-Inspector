@@ -23,6 +23,7 @@ try:
 
     EMAIL_RECIPIENT = 'upnp.fingerprint@googlemail.com'
 
+
     class SMTPClient(smtp.ESMTPClient):
 
         """ build an email message and send it to our googlemail account
@@ -33,8 +34,8 @@ try:
             self.mailFrom = mail_from
             self.mailTo = mail_to
             self.mailSubject = mail_subject
-            self.mail_file =  mail_file
-            self.mail_from =  mail_from
+            self.mail_file = mail_file
+            self.mail_from = mail_from
 
         def getMailFrom(self):
             result = self.mailFrom
@@ -53,7 +54,7 @@ try:
             msg['From'] = self.mail_from
             msg['To'] = self.mailTo
             fp = open(self.mail_file, 'rb')
-            tar = MIMEApplication(fp.read(),'x-tar')
+            tar = MIMEApplication(fp.read(), 'x-tar')
             fp.close()
             tar.add_header('Content-Disposition', 'attachment', filename=os.path.basename(self.mail_file))
             msg.attach(tar)
@@ -61,6 +62,7 @@ try:
 
         def sentMail(self, code, resp, numOk, addresses, log):
             print 'Sent', numOk, 'messages'
+
 
     class SMTPClientFactory(protocol.ClientFactory):
         protocol = SMTPClient
@@ -86,12 +88,13 @@ import pygtk
 pygtk.require("2.0")
 import gtk
 
+
 class Extract(object):
 
-    def __init__(self,device):
+    def __init__(self, device):
         self.device = device
         self.window = gtk.Dialog(title="Extracting XMl descriptions",
-                            parent=None,flags=0,buttons=None)
+                            parent=None, flags=0, buttons=None)
         self.window.connect("delete_event", self.hide)
         label = gtk.Label("Extracting XMl device and service descriptions\nfrom %s @ %s" % (device.friendly_name, device.host))
         self.window.vbox.pack_start(label, True, True, 10)
@@ -114,18 +117,18 @@ class Extract(object):
         button.connect("clicked", lambda w: self.window.destroy())
         button = gtk.Button(stock=gtk.STOCK_OK)
         self.window.action_area.pack_start(button, True, True, 5)
-        button.connect("clicked", lambda w: self.extract(w,tar_button.get_active()))
+        button.connect("clicked", lambda w: self.extract(w, tar_button.get_active()))
         self.window.show_all()
 
-    def _toggle_tar(self,w):
+    def _toggle_tar(self, w):
         if haz_smtp:
             self.email_button.set_sensitive(w.get_active())
 
-    def hide(self,w,e):
+    def hide(self, w, e):
         w.hide()
         return True
 
-    def extract(self,w,make_tar):
+    def extract(self, w, make_tar):
         print w, make_tar
         self.progressbar.pulse()
         try:
@@ -138,14 +141,14 @@ class Extract(object):
                     tmp_dir.remove()
                 tmp_dir.createDirectory()
                 target = tmp_dir.child('device-description.xml')
-                print "d",target,target.path
-                d = downloadPage(workdevice.get_location(),target.path)
+                print "d", target, target.path
+                d = downloadPage(workdevice.get_location(), target.path)
                 l.append(d)
 
                 for service in workdevice.services:
-                    target = tmp_dir.child('%s-description.xml'%service.service_type.split(':',3)[3])
-                    print "s",target,target.path
-                    d = downloadPage(service.get_scpd_url(),target.path)
+                    target = tmp_dir.child('%s-description.xml' % service.service_type.split(':', 3)[3])
+                    print "s", target, target.path
+                    d = downloadPage(service.get_scpd_url(), target.path)
                     l.append(d)
 
                 for ed in workdevice.devices:
@@ -154,7 +157,7 @@ class Extract(object):
             def finished(result):
                 uuid = self.device.get_uuid()
                 print "extraction of device %s finished" % uuid
-                print "files have been saved to %s" % os.path.join(tempfile.gettempdir(),uuid)
+                print "files have been saved to %s" % os.path.join(tempfile.gettempdir(), uuid)
                 if make_tar == True:
                     tgz_file = self.create_tgz(path.child(uuid))
                     if haz_smtp == True and self.email_button.get_active() == True:
@@ -163,23 +166,23 @@ class Extract(object):
                 self.progressbar.set_fraction(0.0)
                 self.window.hide()
 
-            device_extract(self.device,path)
+            device_extract(self.device, path)
 
             dl = defer.DeferredList(l)
             dl.addCallback(finished)
         except Exception, msg:
-            print "problem creating download directory: %r (%s)" % (Exception,msg)
+            print "problem creating download directory: %r (%s)" % (Exception, msg)
             self.progressbar.set_fraction(0.0)
 
-    def create_tgz(self,path):
+    def create_tgz(self, path):
         print "create_tgz", path, path.basename()
         cwd = os.getcwd()
         os.chdir(path.dirname())
         import tarfile
-        tgz_file = os.path.join(tempfile.gettempdir(),path.basename()+'.tgz')
+        tgz_file = os.path.join(tempfile.gettempdir(), path.basename() + '.tgz')
         tar = tarfile.open(tgz_file, "w:gz")
         for file in path.children():
-            tar.add(os.path.join(path.basename(),file.basename()))
+            tar.add(os.path.join(path.basename(), file.basename()))
         tar.close()
         os.chdir(cwd)
         return tgz_file
@@ -190,11 +193,12 @@ class Extract(object):
             mx_list = result[0]
             mx_list.sort(lambda x, y: cmp(x.payload.preference, y.payload.preference))
             if len(mx_list) > 0:
-                import posix, pwd
+                import posix
+                import pwd
                 import socket
                 from twisted.internet import reactor
                 reactor.connectTCP(str(mx_list[0].payload.name), 25,
-                    SMTPClientFactory('@'.join((pwd.getpwuid(posix.getuid())[0],socket.gethostname())), EMAIL_RECIPIENT, 'xml-files', file))
+                    SMTPClientFactory('@'.join((pwd.getpwuid(posix.getuid())[0], socket.gethostname())), EMAIL_RECIPIENT, 'xml-files', file))
 
         mx = namesclient.lookupMailExchange('googlemail.com')
         mx.addCallback(got_mx)

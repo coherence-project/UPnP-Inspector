@@ -12,7 +12,8 @@
     http://coherence.beebits.net
 """
 
-import os, sys
+import os
+import sys
 
 from twisted.internet import gtk2reactor
 gtk2reactor.install()
@@ -27,7 +28,7 @@ from upnp_inspector.base import Inspector
 
 class Options(usage.Options):
 
-    optFlags = [ ['version','v', 'print out version']
+    optFlags = [['version', 'v', 'print out version']
                 ]
     optParameters = [['logfile', 'l', None, 'logfile'],
                     ]

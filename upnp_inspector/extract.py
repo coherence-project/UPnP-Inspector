@@ -4,6 +4,7 @@
 # http://opensource.org/licenses/mit-license.php
 
 # Copyright 2009 - Frank Scholz <coherence@beebits.net>
+# Copyright 2014 - Hartmut Goebel <h.goebel@crazy-compilers.com>
 
 import os
 import tempfile
@@ -23,7 +24,6 @@ try:
     from twisted.names import dns
 
     import StringIO
-
 
 
     class SMTPClient(smtp.ESMTPClient):
@@ -210,10 +210,11 @@ class Extract(object):
                 import pwd
                 import socket
                 from twisted.internet import reactor
+                sender = (pwd.getpwuid(posix.getuid())[0] +
+                          '@' + socket.gethostname())
                 reactor.connectTCP(str(mx_list[0].payload.name), 25,
-                    SMTPClientFactory('@'.join((pwd.getpwuid(posix.getuid())[0],
-                                                socket.gethostname())),
-                                      EMAIL_RECIPIENT, 'xml-files', file))
+                    SMTPClientFactory(sender, EMAIL_RECIPIENT,
+                                      'xml-files', file))
 
         mx = namesclient.lookupMailExchange(EMAIL_DOMAIN)
         mx.addCallback(got_mx)

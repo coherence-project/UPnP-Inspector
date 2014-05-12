@@ -572,8 +572,9 @@ class TreeWidget(object):
         service = self.device.get_service_by_type('ContentDirectory')
         action = service.get_action('Browse')
         d = action.call(ObjectID=object_id, BrowseFlag='BrowseDirectChildren',
-                                         StartingIndex=str(starting_index), RequestedCount=str(requested_count),
-                                         Filter='*', SortCriteria='')
+                        StartingIndex=str(starting_index),
+                        RequestedCount=str(requested_count),
+                        Filter='*', SortCriteria='')
         d.addCallback(reply)
         d.addErrback(self.handle_error)
 

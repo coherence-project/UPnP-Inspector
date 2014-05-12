@@ -83,12 +83,12 @@ class EventsWidget(log.Loggable):
             clipboard = gtk.clipboard_get(gtk.gdk.SELECTION_CLIPBOARD)
             iter = self.store.get_iter(row_path)
             menu = gtk.Menu()
-            item = gtk.MenuItem("copy value")
+            item = gtk.MenuItem("Copy value")
             value, = self.store.get(iter, 4)
             item.connect("activate", lambda w: clipboard.set_text(value))
             menu.append(item)
 
-            item = gtk.MenuItem("copy raw event")
+            item = gtk.MenuItem("Copy raw event XML")
             raw, = self.store.get(iter, 5)
             try:
                 from coherence.extern.et import ET, indent, parse_xml

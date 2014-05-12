@@ -275,30 +275,30 @@ class DevicesWidget(log.Loggable):
                 type, object = self.store.get(iter, TYPE_COLUMN, OBJECT_COLUMN)
                 if type == DEVICE:
                     menu = gtk.Menu()
-                    item = gtk.CheckMenuItem("show events")
+                    item = gtk.CheckMenuItem("Show events")
                     item.set_sensitive(False)
                     menu.append(item)
-                    item = gtk.CheckMenuItem("show log")
+                    item = gtk.CheckMenuItem("Show log")
                     item.set_sensitive(False)
                     menu.append(item)
                     menu.append(gtk.SeparatorMenuItem())
-                    item = gtk.MenuItem("extract device and service descriptions...")
+                    item = gtk.MenuItem("Extract device and service descriptions...")
                     item.connect("activate", self.extract_descriptions, object)
                     menu.append(item)
                     menu.append(gtk.SeparatorMenuItem())
-                    item = gtk.MenuItem("test device...")
+                    item = gtk.MenuItem("Test device...")
                     item.set_sensitive(False)
                     menu.append(item)
                     if(object != None and
                        object.get_device_type().split(':')[3].lower() == 'mediaserver'):
                         menu.append(gtk.SeparatorMenuItem())
-                        item = gtk.MenuItem("browse MediaServer")
+                        item = gtk.MenuItem("Browse MediaServer...")
                         item.connect("activate", self.mediaserver_browse, object)
                         menu.append(item)
                     if(object != None and
                        object.get_device_type().split(':')[3].lower() == 'mediarenderer'):
                         menu.append(gtk.SeparatorMenuItem())
-                        item = gtk.MenuItem("control MediaRendererer")
+                        item = gtk.MenuItem("Control MediaRendererer...")
                         item.connect("activate", self.mediarenderer_control, object)
                         menu.append(item)
                     if(object != None and
@@ -312,10 +312,10 @@ class DevicesWidget(log.Loggable):
                     return True
                 elif type == SERVICE:
                     menu = gtk.Menu()
-                    item = gtk.CheckMenuItem("show events")
+                    item = gtk.CheckMenuItem("Show events")
                     item.set_sensitive(False)
                     menu.append(item)
-                    item = gtk.CheckMenuItem("show log")
+                    item = gtk.CheckMenuItem("Show log")
                     item.set_sensitive(False)
                     menu.append(item)
                     menu.show_all()

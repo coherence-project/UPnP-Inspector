@@ -82,14 +82,14 @@ class ItemDetailsWidget(object):
             clipboard = gtk.clipboard_get(gtk.gdk.SELECTION_CLIPBOARD)
 
             if key in ['DIDL-Lite:res', 'upnp:albumArtURI']:
-                item = gtk.MenuItem("copy URL")
+                item = gtk.MenuItem("Copy URL")
                 item.connect("activate", lambda w: clipboard.set_text(value))
                 menu.append(item)
-                item = gtk.MenuItem("open URL")
+                item = gtk.MenuItem("Open URL")
                 item.connect("activate", lambda w: self.open_url(value))
                 menu.append(item)
             else:
-                item = gtk.MenuItem("copy value")
+                item = gtk.MenuItem("Copy value")
                 item.connect("activate", lambda w: clipboard.set_text(value))
                 menu.append(item)
 
@@ -298,7 +298,7 @@ class TreeWidget(object):
                                     starting_index=0, requested_count=0, force=True, expand=expanded)
 
                     menu = gtk.Menu()
-                    item = gtk.MenuItem("refresh container")
+                    item = gtk.MenuItem("Refresh container")
                     item.connect("activate", lambda x: refresh(widget, row_path))
                     menu.append(item)
 
@@ -352,7 +352,7 @@ class TreeWidget(object):
                         else:
                             menu.append(gtk.SeparatorMenuItem())
 
-                        item = gtk.MenuItem("play on MediaRenderer...")
+                        item = gtk.MenuItem("Play on MediaRenderer")
                         item.set_sensitive(False)
                         menu.append(item)
                         menu.append(gtk.SeparatorMenuItem())

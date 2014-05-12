@@ -63,15 +63,15 @@ class Inspector(log.Loggable):
         menu_bar.append(file_menu)
 
         menu = gtk.Menu()
-        self.show_details_item = gtk.CheckMenuItem("show details")
+        self.show_details_item = gtk.CheckMenuItem("Show details")
         menu.append(self.show_details_item)
         self.show_details_item.connect("activate", self.show_details_widget,
                                        "view.details")
-        self.show_events_item = gtk.CheckMenuItem("show events")
+        self.show_events_item = gtk.CheckMenuItem("Show events")
         menu.append(self.show_events_item)
         self.show_events_item.connect("activate", self.show_events_widget,
                                       "view.events")
-        self.show_log_item = gtk.CheckMenuItem("show global log")
+        self.show_log_item = gtk.CheckMenuItem("Show global log")
         menu.append(self.show_log_item)
         self.show_log_item.connect("activate", self.show_log_widget, "view.log")
         #self.show_log_item.set_sensitive(False)
@@ -85,7 +85,7 @@ class Inspector(log.Loggable):
         menu_bar.append(test_menu)
 
         menu = gtk.Menu()
-        item = gtk.MenuItem("Info")
+        item = gtk.MenuItem("Info...")
         menu.append(item)
         item.connect("activate", self.show_about_widget, "help.info")
         help_menu = gtk.MenuItem("Help")

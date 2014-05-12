@@ -144,7 +144,7 @@ class IGDWidget(log.Loggable):
         path = self.nat_view.get_path_at_pos(x, y)
         if event.button == 3:
             menu = gtk.Menu()
-            item = gtk.MenuItem("add new port-mapping...")
+            item = gtk.MenuItem("Add new port-mapping...")
             item.set_sensitive(False)
             menu.append(item)
             if path != None:
@@ -153,10 +153,10 @@ class IGDWidget(log.Loggable):
                 selection = self.nat_view.get_selection()
                 if not selection.path_is_selected(row_path):
                     self.nat_view.set_cursor(row_path, column, False)
-                item = gtk.MenuItem("modify port-mapping...")
+                item = gtk.MenuItem("Modify port-mapping...")
                 item.set_sensitive(False)
                 menu.append(item)
-                item = gtk.MenuItem("delete port-mapping...")
+                item = gtk.MenuItem("Delete port-mapping...")
                 item.set_sensitive(True)
                 protocol, remote_host, external_port = self.nat_store.get(iter, 2, 3, 4)
                 item.connect("activate", self.delete_mapping, protocol, remote_host, external_port)

@@ -85,7 +85,7 @@ class DetailsWidget(log.Loggable):
         if event.button == 3:
             iter = self.store.get_iter(row_path)
             menu = gtk.Menu()
-            item = gtk.MenuItem("copy value")
+            item = gtk.MenuItem("Copy value")
             value = self.store.get(iter, 1)[0]
             if not isinstance(value, tuple):
                 item.connect("activate",
@@ -97,14 +97,14 @@ class DetailsWidget(log.Loggable):
                 menu.append(item)
 
                 menu.append(gtk.SeparatorMenuItem())
-                item = gtk.MenuItem("copy URL")
+                item = gtk.MenuItem("Copy URL")
                 item.connect("activate",
                              lambda w: self.clipboard.set_text(value[1]))
                 menu.append(item)
 
                 if (len(value) < 3 or
                     (value[2] == True or isinstance(value[2], dict))):
-                    item = gtk.MenuItem("open URL")
+                    item = gtk.MenuItem("Open URL")
                     item.connect("activate", lambda w: self.open_url(value[1]))
                     menu.append(item)
 

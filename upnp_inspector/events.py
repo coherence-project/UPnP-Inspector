@@ -4,6 +4,7 @@
 # http://opensource.org/licenses/mit-license.php
 
 # Copyright 2009 - Frank Scholz <coherence@beebits.net>
+# Copyright 2014 - Hartmut Goebel <h.goebel@crazy-compilers.com>
 
 import time
 
@@ -29,31 +30,15 @@ class EventsWidget(log.Loggable):
         scroll_window.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         self.store = gtk.ListStore(str, str, str, str, str, str)
         self.treeview = gtk.TreeView(self.store)
-        column = gtk.TreeViewColumn('Time')
-        self.treeview.append_column(column)
-        text_cell = gtk.CellRendererText()
-        column.pack_start(text_cell, False)
-        column.set_attributes(text_cell, text=0)
-        column = gtk.TreeViewColumn('Device')
-        self.treeview.append_column(column)
-        text_cell = gtk.CellRendererText()
-        column.pack_start(text_cell, False)
-        column.set_attributes(text_cell, text=1)
-        column = gtk.TreeViewColumn('Service')
-        self.treeview.append_column(column)
-        text_cell = gtk.CellRendererText()
-        column.pack_start(text_cell, False)
-        column.set_attributes(text_cell, text=2)
-        column = gtk.TreeViewColumn('Variable')
-        self.treeview.append_column(column)
-        text_cell = gtk.CellRendererText()
-        column.pack_start(text_cell, False)
-        column.set_attributes(text_cell, text=3)
-        column = gtk.TreeViewColumn('Value')
-        self.treeview.append_column(column)
-        text_cell = gtk.CellRendererText()
-        column.pack_start(text_cell, True)
-        column.set_attributes(text_cell, text=4)
+
+        for i, title in enumerate(
+            ('Time', 'Device','Service', 'Variable', 'Value')):
+            column = gtk.TreeViewColumn(title)
+            self.treeview.append_column(column)
+            text_cell = gtk.CellRendererText()
+            column.pack_start(text_cell, False)
+            column.set_attributes(text_cell, text=i)
+
         scroll_window.add_with_viewport(self.treeview)
         #self.treeview.set_fixed_height_mode(True)
         self.window.add(scroll_window)

@@ -34,6 +34,9 @@ ARGUMENT = 4
 
 from pkg_resources import resource_filename
 
+def _geticon(name):
+    icon = resource_filename(__name__, os.path.join('icons', name))
+    return gtk.gdk.pixbuf_new_from_file(icon)
 
 class DevicesWidget(log.Loggable):
     logCategory = 'inspector'
@@ -54,32 +57,20 @@ class DevicesWidget(log.Loggable):
         self.window.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
 
         self.icons = {}
+        self.icons['device'] = _geticon('upnp-device.png')
+        self.icons['mediaserver'] = _geticon('network-server.png')
+        self.icons['mediarenderer'] = _geticon('media-renderer.png')
+        self.icons['binarylight'] = _geticon('network-light.png')
+        self.icons['dimmablelight'] = self.icons['binarylight']
+        self.icons['digitalsecuritycamera'] = _geticon('camera-web.png')
+        self.icons['printer'] = _geticon('printer.png')
 
-        icon = resource_filename(__name__, os.path.join('icons', 'upnp-device.png'))
-        self.icons['device'] = gtk.gdk.pixbuf_new_from_file(icon)
-        icon = resource_filename(__name__, os.path.join('icons', 'network-server.png'))
-        self.icons['mediaserver'] = gtk.gdk.pixbuf_new_from_file(icon)
-        icon = resource_filename(__name__, os.path.join('icons', 'media-renderer.png'))
-        self.icons['mediarenderer'] = gtk.gdk.pixbuf_new_from_file(icon)
-        icon = resource_filename(__name__, os.path.join('icons', 'network-light.png'))
-        self.icons['binarylight'] = gtk.gdk.pixbuf_new_from_file(icon)
-        self.icons['dimmablelight'] = gtk.gdk.pixbuf_new_from_file(icon)
-        icon = resource_filename(__name__, os.path.join('icons', 'camera-web.png'))
-        self.icons['digitalsecuritycamera'] = gtk.gdk.pixbuf_new_from_file(icon)
-        icon = resource_filename(__name__, os.path.join('icons', 'printer.png'))
-        self.icons['printer'] = gtk.gdk.pixbuf_new_from_file(icon)
-        icon = resource_filename(__name__, os.path.join('icons', 'folder.png'))
-        self.folder_icon = gtk.gdk.pixbuf_new_from_file(icon)
-        icon = resource_filename(__name__, os.path.join('icons', 'upnp-service.png'))
-        self.service_icon = gtk.gdk.pixbuf_new_from_file(icon)
-        icon = resource_filename(__name__, os.path.join('icons', 'upnp-action.png'))
-        self.action_icon = gtk.gdk.pixbuf_new_from_file(icon)
-        icon = resource_filename(__name__, os.path.join('icons', 'upnp-action-arg-in.png'))
-        self.action_arg_in_icon = gtk.gdk.pixbuf_new_from_file(icon)
-        icon = resource_filename(__name__, os.path.join('icons', 'upnp-action-arg-out.png'))
-        self.action_arg_out_icon = gtk.gdk.pixbuf_new_from_file(icon)
-        icon = resource_filename(__name__, os.path.join('icons', 'upnp-state-variable.png'))
-        self.state_variable_icon = gtk.gdk.pixbuf_new_from_file(icon)
+        self.folder_icon = _geticon('folder.png')
+        self.service_icon = _geticon('upnp-service.png')
+        self.action_icon = _geticon('upnp-action.png')
+        self.action_arg_in_icon = _geticon('upnp-action-arg-in.png')
+        self.action_arg_out_icon = _geticon('upnp-action-arg-out.png')
+        self.state_variable_icon = _geticon('upnp-state-variable.png')
 
         self.store = gtk.TreeStore(int,  # 0: type
                                    str,  # 1: name

@@ -14,16 +14,10 @@ Based on the Coherence UPnP/DLNA framework
 http://coherence.beebits.net
 """
 
-from twisted.internet import gtk2reactor
-gtk2reactor.install()
-from twisted.internet import reactor
+import optparse
 
 from upnp_inspector import __version__
 from coherence import __version__ as coherence_version
-
-from upnp_inspector.base import Inspector
-
-import optparse
 
 parser = optparse.OptionParser(
     usage="%prog [-l]",
@@ -33,5 +27,13 @@ parser.add_option('-l', '--logfile',
 options, args = parser.parse_args()
 if args:
     parser.error("%prog does not take any positional argument")
+
+
+from twisted.internet import gtk2reactor
+gtk2reactor.install()
+from twisted.internet import reactor
+
+from upnp_inspector.base import Inspector
+
 i = Inspector(logfile=options.logfile)
 reactor.run()

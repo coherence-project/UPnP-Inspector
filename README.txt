@@ -75,8 +75,10 @@ Requirements and Installation from Source
 
 * `Python 2.x`__ or higher (tested with 2.6, but other
   versions should work, too, Python 3.x is *not* supported),
-* `setuptools`_ or `distribute`_ for installation (see below), and
-* `PyGTK`_.
+* `setuptools`_ or `distribute`_ for installation (see below),
+* `PyGTK`_, and of course
+* Coherence >= 0.6.4 and
+* Twisted (which is required by Coherence).
 
 __ http://www.python.org/download/
 

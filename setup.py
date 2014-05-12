@@ -35,6 +35,6 @@ setup(
         'upnp_inspector': ['icons/*.png'],
     },
     install_requires=[
-    'Coherence >= 0.6.7',
+    'Coherence >= 0.6.4', 'Twisted', 'pygtk', 'setuptools'
     ]
 )

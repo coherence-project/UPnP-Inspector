@@ -4,6 +4,7 @@
 # http://opensource.org/licenses/mit-license.php
 
 # Copyright 2009 - Frank Scholz <coherence@beebits.net>
+# Copyright 2014 - Hartmut Goebel <h.goebel@crazy-compilers.com>
 
 import pygtk
 pygtk.require("2.0")
@@ -80,27 +81,29 @@ class DetailsWidget(log.Loggable):
         path = self.treeview.get_path_at_pos(x, y)
         if path == None:
             return True
-        row_path, column, _, _ = path
+        row_path, column = path[:2]
         if event.button == 3:
             iter = self.store.get_iter(row_path)
             menu = gtk.Menu()
             item = gtk.MenuItem("copy value")
-            value, = self.store.get(iter, 1)
-            if isinstance(value, tuple):
-                item.connect("activate",
-                             lambda w: self.clipboard.set_text(value[0]))
-            else:
+            value = self.store.get(iter, 1)[0]
+            if not isinstance(value, tuple):
                 item.connect("activate",
                              lambda w: self.clipboard.set_text(value))
-            menu.append(item)
-            if isinstance(value, tuple):
+                menu.append(item)
+            else:
+                item.connect("activate",
+                             lambda w: self.clipboard.set_text(value[0]))
+                menu.append(item)
+
                 menu.append(gtk.SeparatorMenuItem())
                 item = gtk.MenuItem("copy URL")
                 item.connect("activate",
                              lambda w: self.clipboard.set_text(value[1]))
                 menu.append(item)
-                if(len(value) < 3 or
-                   (value[2] == True or isinstance(value[2], dict))):
+
+                if (len(value) < 3 or
+                    (value[2] == True or isinstance(value[2], dict))):
                     item = gtk.MenuItem("open URL")
                     item.connect("activate", lambda w: self.open_url(value[1]))
                     menu.append(item)

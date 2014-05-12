@@ -13,6 +13,9 @@ from twisted.internet import protocol
 
 from twisted.python.filepath import FilePath
 
+EMAIL_RECIPIENT = 'upnp.fingerprint@googlemail.com'
+EMAIL_DOMAIN = EMAIL_RECIPIENT.rsplit('@',1)[1]
+
 try:
     from twisted.mail import smtp
 
@@ -21,7 +24,6 @@ try:
 
     import StringIO
 
-    EMAIL_RECIPIENT = 'upnp.fingerprint@googlemail.com'
 
 
     class SMTPClient(smtp.ESMTPClient):
@@ -54,9 +56,8 @@ try:
             msg['Subject'] = self.mailSubject
             msg['From'] = self.mail_from
             msg['To'] = self.mailTo
-            fp = open(self.mail_file, 'rb')
-            tar = MIMEApplication(fp.read(), 'x-tar')
-            fp.close()
+            with open(self.mail_file, 'rb') as fp:
+                tar = MIMEApplication(fp.read(), 'x-tar')
             tar.add_header('Content-Disposition', 'attachment',
                            filename=os.path.basename(self.mail_file))
             msg.attach(tar)
@@ -120,6 +121,7 @@ class Extract(object):
         button = gtk.Button(stock=gtk.STOCK_CANCEL)
         self.window.action_area.pack_start(button, True, True, 5)
         button.connect("clicked", lambda w: self.window.destroy())
+
         button = gtk.Button(stock=gtk.STOCK_OK)
         self.window.action_area.pack_start(button, True, True, 5)
         button.connect("clicked",
@@ -190,10 +192,9 @@ class Extract(object):
         os.chdir(path.dirname())
         import tarfile
         tgz_file = os.path.join(tempfile.gettempdir(), path.basename() + '.tgz')
-        tar = tarfile.open(tgz_file, "w:gz")
-        for file in path.children():
-            tar.add(os.path.join(path.basename(), file.basename()))
-        tar.close()
+        with tarfile.open(tgz_file, "w:gz") as tar:
+            for file in path.children():
+                tar.add(os.path.join(path.basename(), file.basename()))
         os.chdir(cwd)
         return tgz_file
 
@@ -213,5 +214,5 @@ class Extract(object):
                                                 socket.gethostname())),
                                       EMAIL_RECIPIENT, 'xml-files', file))
 
-        mx = namesclient.lookupMailExchange('googlemail.com')
+        mx = namesclient.lookupMailExchange(EMAIL_DOMAIN)
         mx.addCallback(got_mx)

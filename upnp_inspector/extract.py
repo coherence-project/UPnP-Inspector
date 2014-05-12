@@ -183,7 +183,8 @@ class Extract(object):
             dl.addCallback(finished)
         except Exception, msg:
             print "problem creating download directory:",
-            print repr(Exception), "(%s)" % msg
+            import traceback
+            print traceback.format_exc()
             self.progressbar.set_fraction(0.0)
 
     def create_tgz(self, path):

@@ -592,13 +592,13 @@ class MediaRendererWidget(log.Loggable):
         def handle_result(r, service):
             try:
                 duration = r['TrackDuration']
-                h, m, s = duration.split(':')
+                h, m, s = [int(x) for x in duration.split(':')]
                 if int(h) > 0:
-                    duration = '%d:%02d:%02d' % (int(h), int(m), int(s))
+                    duration = '%d:%02d:%02d' % (h, m, s)
                 else:
-                    duration = '%d:%02d' % (int(m), int(s))
-                max = (int(h) * 3600) + (int(m) * 60) + int(s)
-                self.position_scale.set_range(0, max)
+                    duration = '%d:%02d' % (m, s)
+                seconds = (h * 3600) + (m * 60) + s
+                self.position_scale.set_range(0, max(0.1, seconds))
                 self.position_max_text.set_markup(duration)
                 actions = service.get_state_variable('CurrentTransportActions')
                 try:

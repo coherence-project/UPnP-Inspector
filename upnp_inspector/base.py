@@ -4,11 +4,7 @@
 # http://opensource.org/licenses/mit-license.php
 
 # Copyright 2008 Frank Scholz <coherence@beebits.net>
-
-import os.path
-import time
-
-from pkg_resources import resource_filename
+# Copyright 2014 - Hartmut Goebel <h.goebel@crazy-compilers.com>
 
 import pygtk
 pygtk.require("2.0")
@@ -27,6 +23,7 @@ from details import DetailsWidget
 from events import EventsWidget
 from log import LogWidget
 from devices import DevicesWidget, OBJECT_COLUMN
+from ._resources import _geticon_path
 
 
 class Inspector(log.Loggable):
@@ -41,8 +38,7 @@ class Inspector(log.Loggable):
         window.connect("delete_event", lambda x, y: reactor.stop())
         window.set_default_size(350, 700)
         window.set_title('UPnP Inspector')
-        icon = resource_filename(__name__,
-                                 os.path.join('icons', 'inspector-icon.png'))
+        icon = _geticon_path('inspector-icon.png')
         gtk.window_set_default_icon_from_file(icon)
 
         vbox = gtk.VBox(homogeneous=False, spacing=0)

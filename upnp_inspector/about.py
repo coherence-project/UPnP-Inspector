@@ -4,16 +4,14 @@
 # http://opensource.org/licenses/mit-license.php
 
 # Copyright 2009 - Frank Scholz <coherence@beebits.net>
-
-import os.path
-from pkg_resources import resource_filename
+# Copyright 2014 - Hartmut Goebel <h.goebel@crazy-compilers.com>
 
 import pygtk
 pygtk.require("2.0")
 import gtk
 
 from upnp_inspector import __version__
-
+from ._resources import _geticon
 
 class AboutWidget():
 
@@ -44,9 +42,7 @@ class AboutWidget():
             'David Göthberg: http://commons.wikimedia.org/wiki/User:Davidgothberg',
             'Karl Vollmer: http://ampache.org'])
 
-        logo = resource_filename(__name__,
-                                 os.path.join('icons', 'inspector-logo.png'))
-        logo = gtk.gdk.pixbuf_new_from_file(logo)
+        logo = _geticon('inspector-logo.png')
         self.window.set_logo(logo)
 
         self.window.show_all()

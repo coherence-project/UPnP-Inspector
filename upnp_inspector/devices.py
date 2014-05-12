@@ -4,8 +4,8 @@
 # http://opensource.org/licenses/mit-license.php
 
 # Copyright 2009 - Frank Scholz <coherence@beebits.net>
+# Copyright 2014 - Hartmut Goebel <h.goebel@crazy-compilers.com>
 
-import os.path
 import time
 
 import pygtk
@@ -19,6 +19,8 @@ from coherence.upnp.core.utils import means_true
 
 from coherence import log
 
+from ._resources import _geticon
+
 # gtk store defines
 TYPE_COLUMN = 0
 NAME_COLUMN = 1
@@ -31,12 +33,6 @@ SERVICE = 1
 VARIABLE = 2
 ACTION = 3
 ARGUMENT = 4
-
-from pkg_resources import resource_filename
-
-def _geticon(name):
-    icon = resource_filename(__name__, os.path.join('icons', name))
-    return gtk.gdk.pixbuf_new_from_file(icon)
 
 class DevicesWidget(log.Loggable):
     logCategory = 'inspector'

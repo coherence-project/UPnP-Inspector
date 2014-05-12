@@ -4,8 +4,7 @@
 # http://opensource.org/licenses/mit-license.php
 
 # Copyright 2009 - Frank Scholz <coherence@beebits.net>
-
-import os.path
+# Copyright 2014 - Hartmut Goebel <h.goebel@crazy-compilers.com>
 
 import mimetypes
 mimetypes.init()
@@ -19,6 +18,8 @@ from twisted.internet import reactor
 from coherence import log
 from coherence.upnp.core.utils import parse_xml
 
+from ._resources import _geticon
+
 # gtk store defines
 NAME_COLUMN = 0
 ID_COLUMN = 1
@@ -29,8 +30,6 @@ SERVICE_COLUMN = 5
 ICON_COLUMN = 6
 DIDL_COLUMN = 7
 TOOLTIP_ICON_COLUMN = 8
-
-from pkg_resources import resource_filename
 
 namespaces = {'{http://purl.org/dc/elements/1.1/}': 'dc:',
               '{urn:schemas-upnp-org:metadata-1-0/upnp/}': 'upnp:',
@@ -121,18 +120,10 @@ class TreeWidget(object):
         self.window = gtk.ScrolledWindow()
         self.window.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
 
-        icon = resource_filename(__name__,
-                                 os.path.join('icons', 'folder.png'))
-        self.folder_icon = gtk.gdk.pixbuf_new_from_file(icon)
-        icon = resource_filename(__name__,
-                                 os.path.join('icons', 'audio-x-generic.png'))
-        self.audio_icon = gtk.gdk.pixbuf_new_from_file(icon)
-        icon = resource_filename(__name__,
-                                 os.path.join('icons', 'video-x-generic.png'))
-        self.video_icon = gtk.gdk.pixbuf_new_from_file(icon)
-        icon = resource_filename(__name__,
-                                 os.path.join('icons', 'image-x-generic.png'))
-        self.image_icon = gtk.gdk.pixbuf_new_from_file(icon)
+        self.folder_icon = _geticon('folder.png')
+        self.audio_icon = _geticon('audio-x-generic.png')
+        self.video_icon = _geticon('video-x-generic.png')
+        self.image_icon = _geticon('image-x-generic.png')
 
         self.store = gtk.TreeStore(str,  # 0: name or title
                                    str,  # 1: id, '0' for the device

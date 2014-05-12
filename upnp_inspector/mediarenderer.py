@@ -4,8 +4,7 @@
 # http://opensource.org/licenses/mit-license.php
 
 # Copyright 2009 - Frank Scholz <coherence@beebits.net>
-
-import os
+# Copyright 2014 - Hartmut Goebel <h.goebel@crazy-compilers.com>
 
 import pygtk
 pygtk.require("2.0")
@@ -20,7 +19,7 @@ from twisted.internet import task
 from coherence import log
 from coherence.upnp.core.utils import parse_xml, getPage, means_true
 
-from pkg_resources import resource_filename
+from ._resources import _geticon
 
 
 class MediaRendererWidget(log.Loggable):
@@ -50,9 +49,7 @@ class MediaRendererWidget(log.Loggable):
         hbox = gtk.HBox(homogeneous=False, spacing=10)
         hbox.set_border_width(2)
         self.album_art_image = gtk.Image()
-        icon = resource_filename(__name__,
-                                 os.path.join('icons', 'blankalbum.png'))
-        self.blank_icon = gtk.gdk.pixbuf_new_from_file(icon)
+        self.blank_icon = _geticon('blankalbum.png')
         self.album_art_image.set_from_pixbuf(self.blank_icon)
         hbox.pack_start(self.album_art_image, False, False, 2)
         #icon_loader = gtk.gdk.PixbufLoader()
@@ -124,31 +121,21 @@ class MediaRendererWidget(log.Loggable):
         hbox.pack_start(self.volume_scale, False, False, 2)
         button = gtk.Button()
         self.volume_image = gtk.Image()
-        icon = resource_filename(__name__,
-                                 os.path.join('icons', 'audio-volume-low.png'))
-        self.volume_low_icon = gtk.gdk.pixbuf_new_from_file(icon)
+        self.volume_low_icon = _geticon('audio-volume-low.png')
         self.volume_image.set_from_pixbuf(self.volume_low_icon)
         button.set_image(self.volume_image)
         button.connect("clicked", self.mute)
 
-        icon = resource_filename(__name__,
-                                 os.path.join('icons', 'audio-volume-medium.png'))
-        self.volume_medium_icon = gtk.gdk.pixbuf_new_from_file(icon)
-        icon = resource_filename(__name__,
-                                 os.path.join('icons', 'audio-volume-high.png'))
-        self.volume_high_icon = gtk.gdk.pixbuf_new_from_file(icon)
-        icon = resource_filename(__name__,
-                                 os.path.join('icons', 'audio-volume-muted.png'))
-        self.volume_muted_icon = gtk.gdk.pixbuf_new_from_file(icon)
+        self.volume_medium_icon = _geticon('audio-volume-medium.png')
+        self.volume_high_icon = _geticon('audio-volume-high.png')
+        self.volume_muted_icon = _geticon('audio-volume-muted.png')
         hbox.pack_end(button, False, False, 2)
 
         buttonbox.pack_end(hbox, False, False, 2)
         vbox.pack_start(buttonbox, False, False, 2)
 
         self.pause_button_image = gtk.Image()
-        icon = resource_filename(__name__,
-                                 os.path.join('icons', 'media-playback-pause.png'))
-        icon = gtk.gdk.pixbuf_new_from_file(icon)
+        icon = _geticon('media-playback-pause.png')
         self.pause_button_image.set_from_pixbuf(icon)
         self.start_button_image = self.start_button.get_image()
 
@@ -239,8 +226,7 @@ class MediaRendererWidget(log.Loggable):
                     print "can't check for the best resource!"
 
     def make_button(self, icon, callback=None, sensitive=True):
-        icon = resource_filename(__name__, os.path.join('icons', icon))
-        icon = gtk.gdk.pixbuf_new_from_file(icon)
+        icon = _geticon(icon)
         button = gtk.Button()
         image = gtk.Image()
         image.set_from_pixbuf(icon)

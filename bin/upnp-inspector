@@ -23,16 +23,15 @@ from coherence import __version__ as coherence_version
 
 from upnp_inspector.base import Inspector
 
-if __name__ == '__main__':
-    import optparse
+import optparse
 
-    parser = optparse.OptionParser(
-        usage="%prog [-l]",
-        version="%prog " + __version__ + " using Coherence " + coherence_version)
-    parser.add_option('-l', '--logfile',
-                      help='Name of the logfile (defautl: none)')
-    options, args = parser.parse_args()
-    if args:
-        parser.error("%prog does not take any positional argument")
-    i = Inspector(logfile=options.logfile)
-    reactor.run()
+parser = optparse.OptionParser(
+    usage="%prog [-l]",
+    version="%prog " + __version__ + " using Coherence " + coherence_version)
+parser.add_option('-l', '--logfile',
+                  help='Name of the logfile (defautl: none)')
+options, args = parser.parse_args()
+if args:
+    parser.error("%prog does not take any positional argument")
+i = Inspector(logfile=options.logfile)
+reactor.run()

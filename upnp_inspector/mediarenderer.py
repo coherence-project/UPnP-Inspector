@@ -159,26 +159,23 @@ class MediaRendererWidget(log.Loggable):
         #        self.volume_scale.set_value(volume)
         #except:
         #    pass
-        service.subscribe_for_variable('Volume',
-                                       callback=self.state_variable_change)
-        service.subscribe_for_variable('Mute',
-                                       callback=self.state_variable_change)
+        for name, callback in (
+            ('Volume', self.state_variable_change),
+            ('Mute', self.state_variable_change),
+            ):
+            service.subscribe_for_variable(name, callback=callback)
 
         service = self.device.get_service_by_type('AVTransport')
-        if service != None:
-            service.subscribe_for_variable('AVTransportURI',
-                                           callback=self.state_variable_change)
-            service.subscribe_for_variable('CurrentTrackMetaData',
-                                           callback=self.state_variable_change)
-            service.subscribe_for_variable('TransportState',
-                                           callback=self.state_variable_change)
-            service.subscribe_for_variable('CurrentTransportActions',
-                                           callback=self.state_variable_change)
-
-            service.subscribe_for_variable('AbsTime',
-                                           callback=self.state_variable_change)
-            service.subscribe_for_variable('TrackDuration',
-                                           callback=self.state_variable_change)
+        if service is not None:
+            for name, callback in (
+                ('AVTransportURI', self.state_variable_change),
+                ('CurrentTrackMetaData', self.state_variable_change),
+                ('TransportState', self.state_variable_change),
+                ('CurrentTransportActions', self.state_variable_change),
+                ('AbsTime', self.state_variable_change),
+                ('TrackDuration', self.state_variable_change),
+                ):
+                service.subscribe_for_variable(name, callback=callback)
 
         self.get_position()
 

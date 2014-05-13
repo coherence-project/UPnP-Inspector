@@ -351,8 +351,8 @@ class DevicesWidget(log.Loggable):
             self.device_found(device)
 
     def call_action(self, widget, action, in_entries, out_entries, status_bar):
-        self.debug("in_entries %r" % in_entries)
-        self.debug("out_entries %r" % out_entries)
+        self.debug("in_entries %r", in_entries)
+        self.debug("out_entries %r", out_entries)
         context_id = status_bar.get_context_id("Action Statusbar")
         status_bar.pop(context_id)
         status_bar.push(context_id,
@@ -373,8 +373,8 @@ class DevicesWidget(log.Loggable):
                     kwargs[entry] = unicode(value)
 
         def populate(result, entries):
-            self.info("result %r" % result)
-            self.info("entries %r" % entries)
+            self.info("result %r", result)
+            self.info("entries %r", entries)
             status_bar.pop(context_id)
             status_bar.push(context_id,
                             time.strftime("%H:%M:%S") + " - ok")
@@ -393,8 +393,7 @@ class DevicesWidget(log.Loggable):
             status_bar.push(context_id,
                             time.strftime("%H:%M:%S") + " - fail %s" % f.value)
 
-
-        self.info("action %s call %r" % (action.name, kwargs))
+        self.info("action %s call %r", action.name, kwargs)
         d = action.call(**kwargs)
         d.addCallback(populate, out_entries)
         d.addErrback(fail)

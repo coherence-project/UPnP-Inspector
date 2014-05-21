@@ -109,144 +109,144 @@ class DevicesWidget(log.Loggable):
         self.windows = {}
 
     def _build_run_action_box(self, object, id, row_path):
-                    window = gtk.Window()
-                    window.set_default_size(350, 300)
-                    window.set_title('Invoke Action %s' % object.name)
-                    window.connect("delete_event", self.deactivate, id)
+        window = gtk.Window()
+        window.set_default_size(350, 300)
+        window.set_title('Invoke Action %s' % object.name)
+        window.connect("delete_event", self.deactivate, id)
 
-                    def build_label(icon, label):
-                        hbox = gtk.HBox(homogeneous=False, spacing=10)
-                        image = gtk.Image()
-                        image.set_from_pixbuf(icon)
-                        hbox.pack_start(image, False, False, 2)
-                        text = gtk.Label(label)
-                        hbox.pack_start(text, False, False, 2)
-                        return hbox
+        def build_label(icon, label):
+            hbox = gtk.HBox(homogeneous=False, spacing=10)
+            image = gtk.Image()
+            image.set_from_pixbuf(icon)
+            hbox.pack_start(image, False, False, 2)
+            text = gtk.Label(label)
+            hbox.pack_start(text, False, False, 2)
+            return hbox
 
-                    def build_button(label):
-                        hbox = gtk.HBox(homogeneous=False, spacing=10)
-                        image = gtk.Image()
-                        image.set_from_pixbuf(self.action_icon)
-                        hbox.pack_start(image, False, False, 2)
-                        text = gtk.Label(label)
-                        hbox.pack_start(text, False, False, 2)
-                        button = gtk.Button()
-                        button.set_flags(gtk.CAN_DEFAULT)
-                        button.add(hbox)
+        def build_button(label):
+            hbox = gtk.HBox(homogeneous=False, spacing=10)
+            image = gtk.Image()
+            image.set_from_pixbuf(self.action_icon)
+            hbox.pack_start(image, False, False, 2)
+            text = gtk.Label(label)
+            hbox.pack_start(text, False, False, 2)
+            button = gtk.Button()
+            button.set_flags(gtk.CAN_DEFAULT)
+            button.add(hbox)
 
-                        return button
+            return button
 
-                    def build_arguments(action, direction):
-                        text = gtk.Label("<b>'%s' arguments:</b>'" % direction)
-                        text.set_use_markup(True)
-                        hbox = gtk.HBox(homogeneous=False, spacing=10)
-                        hbox.pack_start(text, False, False, 2)
-                        vbox = gtk.VBox(homogeneous=False, spacing=10)
-                        vbox.pack_start(hbox, False, False, 2)
-                        row = 0
+        def build_arguments(action, direction):
+            text = gtk.Label("<b>'%s' arguments:</b>'" % direction)
+            text.set_use_markup(True)
+            hbox = gtk.HBox(homogeneous=False, spacing=10)
+            hbox.pack_start(text, False, False, 2)
+            vbox = gtk.VBox(homogeneous=False, spacing=10)
+            vbox.pack_start(hbox, False, False, 2)
+            row = 0
+            if direction == 'in':
+                arguments = object.get_in_arguments()
+            else:
+                arguments = object.get_out_arguments()
+            table = gtk.Table(rows=len(arguments), columns=2,
+                              homogeneous=False)
+            entries = {}
+            for argument in arguments:
+                variable = action.service.get_state_variable(
+                    argument.state_variable)
+                name = gtk.Label(argument.name + ':')
+                name.set_alignment(0, 0)
+                #hbox = gtk.HBox(homogeneous=False, spacing=2)
+                #hbox.pack_start(name,False,False,2)
+                table.attach(name, 0, 1, row, row + 1, gtk.SHRINK)
+                if variable.data_type == 'boolean':
+                    entry = gtk.CheckButton()
+                    if direction == 'in':
+                        entries[argument.name] = entry.get_active
+                    else:
+                        entry.set_sensitive(False)
+                        entries[argument.name] = (variable.data_type, entry.set_active)
+                elif variable.data_type == 'string':
+                    if direction == 'in' and len(variable.allowed_values) > 0:
+                        store = gtk.ListStore(str)
+                        for value in variable.allowed_values:
+                            store.append((value, ))
+                        entry = gtk.ComboBox()
+                        text_cell = gtk.CellRendererText()
+                        entry.pack_start(text_cell, True)
+                        entry.set_attributes(text_cell, text=0)
+                        entry.set_model(store)
+                        entry.set_active(0)
+                        entries[argument.name] = (entry.get_active, entry.get_model)
+                    else:
                         if direction == 'in':
-                            arguments = object.get_in_arguments()
+                            entry = gtk.Entry(max=0)
+                            entries[argument.name] = entry.get_text
                         else:
-                            arguments = object.get_out_arguments()
-                        table = gtk.Table(rows=len(arguments), columns=2,
-                                          homogeneous=False)
-                        entries = {}
-                        for argument in arguments:
-                            variable = action.service.get_state_variable(
-                                argument.state_variable)
-                            name = gtk.Label(argument.name + ':')
-                            name.set_alignment(0, 0)
-                            #hbox = gtk.HBox(homogeneous=False, spacing=2)
-                            #hbox.pack_start(name,False,False,2)
-                            table.attach(name, 0, 1, row, row + 1, gtk.SHRINK)
-                            if variable.data_type == 'boolean':
-                                entry = gtk.CheckButton()
-                                if direction == 'in':
-                                    entries[argument.name] = entry.get_active
-                                else:
-                                    entry.set_sensitive(False)
-                                    entries[argument.name] = (variable.data_type, entry.set_active)
-                            elif variable.data_type == 'string':
-                                if direction == 'in' and len(variable.allowed_values) > 0:
-                                    store = gtk.ListStore(str)
-                                    for value in variable.allowed_values:
-                                        store.append((value, ))
-                                    entry = gtk.ComboBox()
-                                    text_cell = gtk.CellRendererText()
-                                    entry.pack_start(text_cell, True)
-                                    entry.set_attributes(text_cell, text=0)
-                                    entry.set_model(store)
-                                    entry.set_active(0)
-                                    entries[argument.name] = (entry.get_active, entry.get_model)
-                                else:
-                                    if direction == 'in':
-                                        entry = gtk.Entry(max=0)
-                                        entries[argument.name] = entry.get_text
-                                    else:
-                                        entry = gtk.ScrolledWindow()
-                                        entry.set_border_width(1)
-                                        entry.set_shadow_type(gtk.SHADOW_ETCHED_IN)
-                                        entry.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-                                        textview = gtk.TextView()
-                                        textview.set_editable(False)
-                                        textview.set_wrap_mode(gtk.WRAP_WORD)
-                                        entry.add(textview)
-                                        entries[argument.name] = ('text', textview)
-                            else:
-                                if direction == 'out':
-                                    entry = gtk.Entry(max=0)
-                                    entry.set_editable(False)
-                                    entries[argument.name] = (variable.data_type, entry.set_text)
-                                else:
-                                    adj = gtk.Adjustment(0, 0, 4294967296, 1.0, 50.0, 0.0)
-                                    entry = gtk.SpinButton(adj, 0, 0)
-                                    entry.set_numeric(True)
-                                    entry.set_digits(0)
-                                    entries[argument.name] = entry.get_value_as_int
+                            entry = gtk.ScrolledWindow()
+                            entry.set_border_width(1)
+                            entry.set_shadow_type(gtk.SHADOW_ETCHED_IN)
+                            entry.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+                            textview = gtk.TextView()
+                            textview.set_editable(False)
+                            textview.set_wrap_mode(gtk.WRAP_WORD)
+                            entry.add(textview)
+                            entries[argument.name] = ('text', textview)
+                else:
+                    if direction == 'out':
+                        entry = gtk.Entry(max=0)
+                        entry.set_editable(False)
+                        entries[argument.name] = (variable.data_type, entry.set_text)
+                    else:
+                        adj = gtk.Adjustment(0, 0, 4294967296, 1.0, 50.0, 0.0)
+                        entry = gtk.SpinButton(adj, 0, 0)
+                        entry.set_numeric(True)
+                        entry.set_digits(0)
+                        entries[argument.name] = entry.get_value_as_int
 
-                            table.attach(entry, 1, 2, row, row + 1, gtk.FILL | gtk.EXPAND, gtk.FILL | gtk.EXPAND)
-                            row += 1
-                        #hbox = gtk.HBox(homogeneous=False, spacing=10)
-                        #hbox.pack_start(table,False,False,2)
-                        #hbox.show()
-                        vbox.pack_start(table, False, False, 2)
-                        return vbox, entries
+                table.attach(entry, 1, 2, row, row + 1, gtk.FILL | gtk.EXPAND, gtk.FILL | gtk.EXPAND)
+                row += 1
+            #hbox = gtk.HBox(homogeneous=False, spacing=10)
+            #hbox.pack_start(table,False,False,2)
+            #hbox.show()
+            vbox.pack_start(table, False, False, 2)
+            return vbox, entries
 
-                    vbox = gtk.VBox(homogeneous=False, spacing=10)
-                    vbox.pack_start(build_label(self.store[row_path[0]][ICON_COLUMN],
-                                                self.store[row_path[0]][NAME_COLUMN]),
-                                    False, False, 2)
-                    vbox.pack_start(build_label(self.service_icon,
-                                                self.store[row_path[0],
-                                                           row_path[1]][NAME_COLUMN]),
-                                    False, False, 2)
-                    vbox.pack_start(build_label(self.action_icon, object.name),
-                                    False, False, 2)
-                    hbox = gtk.HBox(homogeneous=False, spacing=10)
-                    hbox.pack_start(vbox, False, False, 2)
-                    button = build_button('Invoke')
-                    hbox.pack_end(button, False, False, 20)
-                    vbox = gtk.VBox(homogeneous=False, spacing=10)
-                    vbox.pack_start(hbox, False, False, 2)
-                    in_entries = {}
-                    out_entries = {}
-                    if len(object.get_in_arguments()) > 0:
-                        box, in_entries = build_arguments(object, 'in')
-                        vbox.pack_start(box, False, False, 2)
-                    if len(object.get_out_arguments()) > 0:
-                        box, out_entries = build_arguments(object, 'out')
-                        vbox.pack_start(box, False, False, 2)
-                    window.add(vbox)
+        vbox = gtk.VBox(homogeneous=False, spacing=10)
+        vbox.pack_start(build_label(self.store[row_path[0]][ICON_COLUMN],
+                                    self.store[row_path[0]][NAME_COLUMN]),
+                        False, False, 2)
+        vbox.pack_start(build_label(self.service_icon,
+                                    self.store[row_path[0],
+                                               row_path[1]][NAME_COLUMN]),
+                        False, False, 2)
+        vbox.pack_start(build_label(self.action_icon, object.name),
+                        False, False, 2)
+        hbox = gtk.HBox(homogeneous=False, spacing=10)
+        hbox.pack_start(vbox, False, False, 2)
+        button = build_button('Invoke')
+        hbox.pack_end(button, False, False, 20)
+        vbox = gtk.VBox(homogeneous=False, spacing=10)
+        vbox.pack_start(hbox, False, False, 2)
+        in_entries = {}
+        out_entries = {}
+        if len(object.get_in_arguments()) > 0:
+            box, in_entries = build_arguments(object, 'in')
+            vbox.pack_start(box, False, False, 2)
+        if len(object.get_out_arguments()) > 0:
+            box, out_entries = build_arguments(object, 'out')
+            vbox.pack_start(box, False, False, 2)
+        window.add(vbox)
 
-                    status_bar = gtk.Statusbar()
-                    context_id = status_bar.get_context_id("Action Statusbar")
-                    vbox.pack_end(status_bar, False, False, 2)
+        status_bar = gtk.Statusbar()
+        context_id = status_bar.get_context_id("Action Statusbar")
+        vbox.pack_end(status_bar, False, False, 2)
 
-                    button.connect('clicked', self.call_action, object,
-                                   in_entries, out_entries, status_bar)
+        button.connect('clicked', self.call_action, object,
+                       in_entries, out_entries, status_bar)
 
-                    window.show_all()
-                    self.windows[id] = window
+        window.show_all()
+        self.windows[id] = window
 
     def activated(self, view, row_path, column):
         iter = self.store.get_iter(row_path)

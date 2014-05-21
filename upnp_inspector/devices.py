@@ -94,6 +94,13 @@ class DevicesWidget(log.Loggable):
         self.treeview.connect("row-activated", self.activated)
         self.treeview.connect("move_cursor", self.moved_cursor)
 
+        gtk.binding_entry_add_signal(self.treeview, gtk.keysyms.Left, 0,
+                                     "expand-collapse-cursor-row",
+                                     bool, False, bool, False, bool, False)
+        gtk.binding_entry_add_signal(self.treeview, gtk.keysyms.Right, 0,
+                                     "expand-collapse-cursor-row",
+                                     bool, False, bool, True, bool, False)
+
         selection = self.treeview.get_selection()
         selection.set_mode(gtk.SELECTION_SINGLE)
 

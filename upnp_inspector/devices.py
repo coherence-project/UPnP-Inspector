@@ -108,17 +108,7 @@ class DevicesWidget(log.Loggable):
 
         self.windows = {}
 
-    def activated(self, view, row_path, column):
-        iter = self.store.get_iter(row_path)
-        if iter:
-            type, object = self.store.get(iter, TYPE_COLUMN, OBJECT_COLUMN)
-            if type == ACTION:
-                id = '@'.join((object.service.device.get_usn(),
-                               object.service.service_type,
-                               object.name))
-                try:
-                    self.windows[id].show()
-                except:
+    def _build_run_action_box(self, object, id, row_path):
                     window = gtk.Window()
                     window.set_default_size(350, 300)
                     window.set_title('Invoke Action %s' % object.name)
@@ -257,6 +247,19 @@ class DevicesWidget(log.Loggable):
 
                     window.show_all()
                     self.windows[id] = window
+
+    def activated(self, view, row_path, column):
+        iter = self.store.get_iter(row_path)
+        if iter:
+            type, object = self.store.get(iter, TYPE_COLUMN, OBJECT_COLUMN)
+            if type == ACTION:
+                id = '@'.join((object.service.device.get_usn(),
+                               object.service.service_type,
+                               object.name))
+                try:
+                    self.windows[id].show()
+                except:
+                    self._build_run_action_box(object, id, row_path)
             else:
                 if view.row_expanded(row_path):
                     view.collapse_row(row_path)

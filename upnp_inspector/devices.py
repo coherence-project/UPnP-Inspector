@@ -34,6 +34,11 @@ VARIABLE = 2
 ACTION = 3
 ARGUMENT = 4
 
+def device_type(object):
+    if object is None:
+        return None
+    return object.get_device_type().split(':')[3].lower()
+
 class DevicesWidget(log.Loggable):
     logCategory = 'inspector'
 
@@ -299,20 +304,18 @@ class DevicesWidget(log.Loggable):
                     item = gtk.MenuItem("Test device...")
                     item.set_sensitive(False)
                     menu.append(item)
-                    if(object != None and
-                       object.get_device_type().split(':')[3].lower() == 'mediaserver'):
+                    devtype = device_type(object)
+                    if devtype == 'mediaserver':
                         menu.append(gtk.SeparatorMenuItem())
                         item = gtk.MenuItem("Browse MediaServer...")
                         item.connect("activate", self.mediaserver_browse, object)
                         menu.append(item)
-                    if(object != None and
-                       object.get_device_type().split(':')[3].lower() == 'mediarenderer'):
+                    elif devtype == 'mediarenderer':
                         menu.append(gtk.SeparatorMenuItem())
                         item = gtk.MenuItem("Control MediaRendererer...")
                         item.connect("activate", self.mediarenderer_control, object)
                         menu.append(item)
-                    if(object != None and
-                       object.get_device_type().split(':')[3].lower() == 'internetgatewaydevice'):
+                    elif devtype == 'internetgatewaydevice':
                         menu.append(gtk.SeparatorMenuItem())
                         item = gtk.MenuItem("control InternetGatewayDevice")
                         item.connect("activate", self.igd_control, object)

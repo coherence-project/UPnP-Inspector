@@ -265,6 +265,14 @@ class DevicesWidget(log.Loggable):
                     self.windows[id].show()
                 except:
                     self._build_run_action_box(object, id, row_path)
+            elif type == DEVICE:
+                devtype = device_type(object)
+                if devtype == 'mediaserver':
+                    self.mediaserver_browse(None, object)
+                elif devtype == 'mediarenderer':
+                    self.mediarenderer_control(None, object)
+                elif devtype == 'internetgatewaydevice':
+                    self.igd_control(None, object)
             else:
                 if view.row_expanded(row_path):
                     view.collapse_row(row_path)

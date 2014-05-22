@@ -99,7 +99,6 @@ class Extract(object):
         self.device = device
         self.window = gtk.Dialog(title="Extracting XMl descriptions",
                             parent=None, flags=0, buttons=None)
-        self.window.connect("delete_event", self.hide)
         label = gtk.Label("Extracting XMl device and service descriptions\n"
                           "from %s @ %s" % (device.friendly_name, device.host))
         self.window.vbox.pack_start(label, True, True, 10)
@@ -137,10 +136,6 @@ class Extract(object):
     def _toggle_tar(self, window):
         if has_smtp:
             self.email_button.set_sensitive(window.get_active())
-
-    def hide(self, window, e):
-        window.hide()
-        return True
 
     def extract(self, make_tar):
 

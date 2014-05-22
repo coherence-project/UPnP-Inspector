@@ -37,7 +37,8 @@ class AboutWidget():
         self.window.set_website('http://coherence.beebits.net')
         self.window.set_authors([
             'Frank Scholz <fs@beebits.net>',
-            'Michael Weinrich <testsuite@michael-weinrich.de>'])
+            'Michael Weinrich <testsuite@michael-weinrich.de>',
+            'Hartmut Goebel <h.goebel@crazy-compilers.com>'])
         self.window.set_artists([
             'Tango Desktop Project http://tango.freedesktop.org',
             'David Göthberg: http://commons.wikimedia.org/wiki/User:Davidgothberg',

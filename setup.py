@@ -15,7 +15,7 @@ setup(
     version=__version__,
     description="""UPnP Device and Service analyzer""",
     long_description=long_description,
-    author="Frank Scholz",
+    author="Frank Scholz, Hartmut Goebel",
     author_email='coherence@beebits.net',
     license="MIT",
     packages=packages,

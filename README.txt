@@ -8,7 +8,7 @@ An UPnP Device and Service analyzer based on Coherence
 --------------------------------------------------------------------------
 
 :Author:    Frank Scholz
-:Copyright: 2008 by Frank Scholz
+:Copyright: 2008 by Frank Scholz, 2014 by Hartmut Goebel
 :Licence:   MIT licence
 :Homepage:  http://coherence-project.org/wiki/UPnP-Inspector
 

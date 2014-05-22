@@ -145,14 +145,14 @@ class Extract(object):
                 tmp_dir.remove()
             tmp_dir.createDirectory()
             target = tmp_dir.child('device-description.xml')
-            print "d", target, target.path
+            print "device", target.path
             d = downloadPage(workdevice.get_location(), target.path)
             l.append(d)
 
             for service in workdevice.services:
                 target = tmp_dir.child('%s-description.xml' %
                                        service.service_type.split(':', 3)[3])
-                print "s", target, target.path
+                print "service", target.path
                 d = downloadPage(service.get_scpd_url(), target.path)
                 l.append(d)
 
@@ -191,7 +191,7 @@ class Extract(object):
     def create_tgz(self, path):
         import tarfile
         tgz_file = path.path + '.tgz'
-        print "create_tgz", tgz_file
+        print "creating", tgz_file
         cwd = os.getcwd()
         os.chdir(path.dirname())
         with tarfile.open(tgz_file, "w:gz") as tar:

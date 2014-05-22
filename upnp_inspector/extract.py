@@ -172,7 +172,7 @@ class Extract(object):
                 if has_smtp and self.email_button.get_active():
                     self.send_email(tgz_file)
             self.progressbar.set_fraction(0.0)
-            self.window.hide()
+            self.window.destroy()
             self.show_result(msg + outpath)
 
         self.progressbar.pulse()

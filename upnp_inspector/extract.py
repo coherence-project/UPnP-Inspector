@@ -125,7 +125,7 @@ class Extract(object):
         button = gtk.Button(stock=gtk.STOCK_OK)
         self.window.action_area.pack_start(button, True, True, 5)
         button.connect("clicked",
-                       lambda w: self.extract(w, tar_button.get_active()))
+                       lambda w: self.extract(tar_button.get_active()))
         self.window.show_all()
 
     def show_result(self, msg):
@@ -142,7 +142,7 @@ class Extract(object):
         window.hide()
         return True
 
-    def extract(self, w, make_tar):
+    def extract(self, make_tar):
 
         def device_extract(workdevice, workpath):
             tmp_dir = workpath.child(workdevice.get_uuid())
@@ -180,7 +180,6 @@ class Extract(object):
             self.window.hide()
             self.show_result(msg + outpath)
 
-        print w, make_tar
         self.progressbar.pulse()
         try:
             l = []

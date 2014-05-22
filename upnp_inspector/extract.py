@@ -128,6 +128,12 @@ class Extract(object):
                        lambda w: self.extract(w, tar_button.get_active()))
         self.window.show_all()
 
+    def show_result(self, msg):
+        msgDialog = gtk.MessageDialog(buttons=gtk.BUTTONS_CLOSE)
+        msgDialog.set_markup(msg)
+        msgDialog.run()
+        msgDialog.destroy()
+
     def _toggle_tar(self, w):
         if haz_smtp:
             self.email_button.set_sensitive(w.get_active())
@@ -165,17 +171,19 @@ class Extract(object):
 
             def finished(result):
                 uuid = self.device.get_uuid()
-                print "extraction of device", uuid, "finished"
-                print "files have been saved to",
-                print os.path.join(tempfile.gettempdir(), uuid)
+                msg = ("Extraction of device <b>%s</b> finished.\n"
+                       "Files have been saved to\n" % self.device.friendly_name)
+                outpath = os.path.join(tempfile.gettempdir(), uuid)
                 if make_tar == True:
                     tgz_file = self.create_tgz(path.child(uuid))
+                    outpath = tgz_file
                     if (haz_smtp == True and
                         self.email_button.get_active() == True):
                         self.send_email(tgz_file)
                     path.child(uuid).remove()
                 self.progressbar.set_fraction(0.0)
                 self.window.hide()
+                self.show_result(msg + outpath)
 
             device_extract(self.device, path)
 

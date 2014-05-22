@@ -163,19 +163,20 @@ class Extract(object):
 
             for ed in workdevice.devices:
                 device_extract(ed, tmp_dir)
+            return tmp_dir
 
         def finished(result):
             uuid = self.device.get_uuid()
             msg = ("Extraction of device <b>%s</b> finished.\n"
                    "Files have been saved to\n" % self.device.friendly_name)
-            outpath = os.path.join(tempfile.gettempdir(), uuid)
+            outpath = workpath.path
             if make_tar == True:
-                tgz_file = self.create_tgz(path.child(uuid))
+                tgz_file = self.create_tgz(workpath)
                 outpath = tgz_file
                 if (haz_smtp == True and
                     self.email_button.get_active() == True):
                     self.send_email(tgz_file)
-                path.child(uuid).remove()
+                workpath.remove()
             self.progressbar.set_fraction(0.0)
             self.window.hide()
             self.show_result(msg + outpath)
@@ -183,8 +184,8 @@ class Extract(object):
         self.progressbar.pulse()
         try:
             l = []
-            path = FilePath(tempfile.gettempdir())
-            device_extract(self.device, path)
+            workpath = device_extract(self.device,
+                                      FilePath(tempfile.gettempdir()))
             dl = defer.DeferredList(l)
             dl.addCallback(finished)
         except Exception, msg:
@@ -198,7 +199,7 @@ class Extract(object):
         cwd = os.getcwd()
         os.chdir(path.dirname())
         import tarfile
-        tgz_file = os.path.join(tempfile.gettempdir(), path.basename() + '.tgz')
+        tgz_file = path.path + '.tgz'
         with tarfile.open(tgz_file, "w:gz") as tar:
             for file in path.children():
                 tar.add(os.path.join(path.basename(), file.basename()))

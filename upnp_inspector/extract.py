@@ -200,8 +200,7 @@ class Extract(object):
         import tarfile
         tgz_file = path.path + '.tgz'
         with tarfile.open(tgz_file, "w:gz") as tar:
-            for file in path.children():
-                tar.add(os.path.join(path.basename(), file.basename()))
+            tar.add(path.basename(), recursive=True)
         os.chdir(cwd)
         return tgz_file
 

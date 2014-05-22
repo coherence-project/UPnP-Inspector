@@ -16,7 +16,7 @@ setup(
     description="""UPnP Device and Service analyzer""",
     long_description=long_description,
     author="Frank Scholz, Hartmut Goebel",
-    author_email='coherence@beebits.net',
+    author_email='h.goebel@crazy-compilers.com',
     license="MIT",
     packages=packages,
     scripts=['bin/upnp-inspector'],

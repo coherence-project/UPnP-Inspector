@@ -144,41 +144,41 @@ class Extract(object):
 
     def extract(self, w, make_tar):
 
-            def device_extract(workdevice, workpath):
-                tmp_dir = workpath.child(workdevice.get_uuid())
-                if tmp_dir.exists():
-                    tmp_dir.remove()
-                tmp_dir.createDirectory()
-                target = tmp_dir.child('device-description.xml')
-                print "d", target, target.path
-                d = downloadPage(workdevice.get_location(), target.path)
+        def device_extract(workdevice, workpath):
+            tmp_dir = workpath.child(workdevice.get_uuid())
+            if tmp_dir.exists():
+                tmp_dir.remove()
+            tmp_dir.createDirectory()
+            target = tmp_dir.child('device-description.xml')
+            print "d", target, target.path
+            d = downloadPage(workdevice.get_location(), target.path)
+            l.append(d)
+
+            for service in workdevice.services:
+                target = tmp_dir.child('%s-description.xml' %
+                                       service.service_type.split(':', 3)[3])
+                print "s", target, target.path
+                d = downloadPage(service.get_scpd_url(), target.path)
                 l.append(d)
 
-                for service in workdevice.services:
-                    target = tmp_dir.child('%s-description.xml' %
-                                           service.service_type.split(':', 3)[3])
-                    print "s", target, target.path
-                    d = downloadPage(service.get_scpd_url(), target.path)
-                    l.append(d)
+            for ed in workdevice.devices:
+                device_extract(ed, tmp_dir)
 
-                for ed in workdevice.devices:
-                    device_extract(ed, tmp_dir)
-
-            def finished(result):
-                uuid = self.device.get_uuid()
-                msg = ("Extraction of device <b>%s</b> finished.\n"
-                       "Files have been saved to\n" % self.device.friendly_name)
-                outpath = os.path.join(tempfile.gettempdir(), uuid)
-                if make_tar == True:
-                    tgz_file = self.create_tgz(path.child(uuid))
-                    outpath = tgz_file
-                    if (haz_smtp == True and
-                        self.email_button.get_active() == True):
-                        self.send_email(tgz_file)
-                    path.child(uuid).remove()
-                self.progressbar.set_fraction(0.0)
-                self.window.hide()
-                self.show_result(msg + outpath)
+        def finished(result):
+            uuid = self.device.get_uuid()
+            msg = ("Extraction of device <b>%s</b> finished.\n"
+                   "Files have been saved to\n" % self.device.friendly_name)
+            outpath = os.path.join(tempfile.gettempdir(), uuid)
+            if make_tar == True:
+                tgz_file = self.create_tgz(path.child(uuid))
+                outpath = tgz_file
+                if (haz_smtp == True and
+                    self.email_button.get_active() == True):
+                    self.send_email(tgz_file)
+                path.child(uuid).remove()
+            self.progressbar.set_fraction(0.0)
+            self.window.hide()
+            self.show_result(msg + outpath)
 
         print w, make_tar
         self.progressbar.pulse()

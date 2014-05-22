@@ -143,11 +143,6 @@ class Extract(object):
         return True
 
     def extract(self, w, make_tar):
-        print w, make_tar
-        self.progressbar.pulse()
-        try:
-            l = []
-            path = FilePath(tempfile.gettempdir())
 
             def device_extract(workdevice, workpath):
                 tmp_dir = workpath.child(workdevice.get_uuid())
@@ -185,8 +180,12 @@ class Extract(object):
                 self.window.hide()
                 self.show_result(msg + outpath)
 
+        print w, make_tar
+        self.progressbar.pulse()
+        try:
+            l = []
+            path = FilePath(tempfile.gettempdir())
             device_extract(self.device, path)
-
             dl = defer.DeferredList(l)
             dl.addCallback(finished)
         except Exception, msg:

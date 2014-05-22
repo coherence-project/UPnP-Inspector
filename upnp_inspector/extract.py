@@ -194,11 +194,11 @@ class Extract(object):
             self.progressbar.set_fraction(0.0)
 
     def create_tgz(self, path):
-        print "create_tgz", path, path.basename()
-        cwd = os.getcwd()
-        os.chdir(path.dirname())
         import tarfile
         tgz_file = path.path + '.tgz'
+        print "create_tgz", tgz_file
+        cwd = os.getcwd()
+        os.chdir(path.dirname())
         with tarfile.open(tgz_file, "w:gz") as tar:
             tar.add(path.basename(), recursive=True)
         os.chdir(cwd)

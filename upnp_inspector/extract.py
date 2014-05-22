@@ -173,10 +173,10 @@ class Extract(object):
             if make_tar == True:
                 tgz_file = self.create_tgz(workpath)
                 outpath = tgz_file
+                workpath.remove()
                 if (haz_smtp == True and
                     self.email_button.get_active() == True):
                     self.send_email(tgz_file)
-                workpath.remove()
             self.progressbar.set_fraction(0.0)
             self.window.hide()
             self.show_result(msg + outpath)

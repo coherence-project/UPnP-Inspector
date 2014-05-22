@@ -82,9 +82,9 @@ try:
                                  self.mail_subject, self.mail_file,
                                  secret=None, identity='localhost')
 
-    haz_smtp = True
+    has_smtp = True
 except ImportError:
-    haz_smtp = False
+    has_smtp = False
 
 from coherence.upnp.core.utils import downloadPage
 
@@ -107,7 +107,7 @@ class Extract(object):
         tar_button.connect("toggled", self._toggle_tar)
         self.window.vbox.pack_start(tar_button, True, True, 5)
 
-        if haz_smtp == True:
+        if has_smtp:
             self.email_button = gtk.CheckButton("email them to Coherence HQ "
                                                 "(%s)" % EMAIL_RECIPIENT)
             self.email_button.set_sensitive(False)
@@ -135,7 +135,7 @@ class Extract(object):
         msgDialog.destroy()
 
     def _toggle_tar(self, window):
-        if haz_smtp:
+        if has_smtp:
             self.email_button.set_sensitive(window.get_active())
 
     def hide(self, window, e):
@@ -170,12 +170,11 @@ class Extract(object):
             msg = ("Extraction of device <b>%s</b> finished.\n"
                    "Files have been saved to\n" % self.device.friendly_name)
             outpath = workpath.path
-            if make_tar == True:
+            if make_tar:
                 tgz_file = self.create_tgz(workpath)
                 outpath = tgz_file
                 workpath.remove()
-                if (haz_smtp == True and
-                    self.email_button.get_active() == True):
+                if has_smtp and self.email_button.get_active():
                     self.send_email(tgz_file)
             self.progressbar.set_fraction(0.0)
             self.window.hide()

@@ -349,8 +349,8 @@ class DevicesWidget(log.Loggable):
             return False
         return 0
 
-    def extract_descriptions(self, w, device):
-        print "extract xml descriptions", w, device
+    def extract_descriptions(self, widget, device):
+        print "extract xml descriptions", widget, device
         from extract import Extract
         id = '@'.join((device.get_usn(), 'DeviceXMlExtract'))
         try:

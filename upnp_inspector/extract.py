@@ -134,12 +134,12 @@ class Extract(object):
         msgDialog.run()
         msgDialog.destroy()
 
-    def _toggle_tar(self, w):
+    def _toggle_tar(self, window):
         if haz_smtp:
-            self.email_button.set_sensitive(w.get_active())
+            self.email_button.set_sensitive(window.get_active())
 
-    def hide(self, w, e):
-        w.hide()
+    def hide(self, window, e):
+        window.hide()
         return True
 
     def extract(self, w, make_tar):

@@ -445,7 +445,7 @@ class DevicesWidget(log.Loggable):
                     (VARIABLE, variable.name, '',
                      self.state_variable_icon, variable))
 
-            for action in service.get_actions().values():
+            for action in sorted(service.get_actions().values(), key=lambda a: a.name):
                 action_item = self.store.append(
                     service_item,
                     (ACTION, action.name, '',

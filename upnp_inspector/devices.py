@@ -420,7 +420,8 @@ class DevicesWidget(log.Loggable):
         d.addErrback(fail)
 
     def device_found(self, device=None, row=None):
-        self.info(device.get_friendly_name(),
+        self.info("%s %s %s %s",
+                  device.get_friendly_name(),
                   device.get_usn(),
                   device.get_device_type().split(':')[3].lower(),
                   device.get_device_type())
